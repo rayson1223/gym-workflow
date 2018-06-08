@@ -1,2 +1,10 @@
 .idea
 .idea/*
+*.egg-info
+dist
+dist/*
+build
+build/*
+gym_workflow/data/*
+gym_workflow/work/*
+__pycache__

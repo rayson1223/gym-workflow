@@ -1,9 +1,11 @@
 from setuptools import setup, find_packages
 
 setup(name='gym_workflow',
-      packages=find_packages(),
-      version='0.0.1',
+      author='Rayson Leong',
+      author_email='rayson@um.edu.my',
+      url='https://github.com/rayson1223/gym-workflow.git',
+      version='0.1',
       install_requires=['gym', 'astropy', 'karellen-sqlite'],
-      dependecies_link=['https://github.com/pegasus-isi/montage-workflow-v2.git'],
-      include_package_data=True,
+      # dependency_links=['git+https://github.com/pegasus-isi/montage-workflow-v2.git#egg=montage-gen-2.0',
+      #                   'git+https://github.com/Caltech-IPAC/Montage.git#egg=5.0'],
       )

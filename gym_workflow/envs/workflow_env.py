@@ -39,5 +39,7 @@ class WorkflowEnv(gym.Env):
 		self.clusters_num = 1
 		self.band_num = 1
 
-	def render(self, mode='human', close=False):
-		...
+	def render(self, mode='human'):
+		outfile = StringIO() if mode == 'ansi' else sys.stdout
+		init_msg = "Current Experiment Parameters:\n degree: %d\t cluster.size: %d\t cluster.num: %d\t\n" % (self.degree, self.clusters_size, self.clusters_num)
+		outfile.write(init_msg)
