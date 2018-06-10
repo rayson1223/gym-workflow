@@ -1102,7 +1102,7 @@ class Transformation(UseMixin, InvokeMixin):
 			return a.link
 
 		used = list(self.used)
-		used.sort(key=getlink)
+		# used.sort(key=getlink)
 		for u in used:
 			e.element(u.toTransformationXML())
 

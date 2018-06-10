@@ -10,7 +10,7 @@ class Montage:
 
 	def __init__(
 			self, type="2mass", center="15.09552 -0.74559",
-			degrees=0.1, band=["dss:DSS2B:red"], target="regular"
+			degrees=0.1, band=["2mass:j:red"], target="regular"
 	):
 		self.montage_type = type
 		self.center = center  # Center of the output, for example M17 or 56.5 23.75
@@ -243,7 +243,7 @@ class Montage:
 		t = ascii.read("%s/%s-diffs.tbl" % (self.data_dir, band_id))
 
 		# make sure we have a wide enough column
-		# t['stat'] = "                                                                  "
+		t['stat'] = "                                                                  "
 		for row in t:
 			base_name = re.sub("(diff\.|\.fits.*)", "", row['diff'])
 			row['stat'] = "%s-fit.%s.txt" % (band_id, base_name)
@@ -416,6 +416,17 @@ class Montage:
 		self.dax.writeXML(fd)
 		fd.close()
 
+	def write_property_conf(self):
+		fd = open("%s/pegasus.properties" % self.data_dir, "w")
+		fd.write("pegasus.metrics.app = Montage\n")
+		fd.write("pegasus.catalog.transformation      = Text\n")
+		fd.write("pegasus.catalog.transformation.file = %s/tc.txt\n" % self.data_dir)
+		fd.write("pegasus.catalog.replica      = File\n")
+		fd.write("pegasus.catalog.replica.file = %s/rc.txt\n" % self.data_dir)
+		fd.write("pegasus.data.configuration = condorio\n")
+		fd.write("pegasus.gridstart.arguments = -f\n")
+		fd.close()
+
 	def pegasus_plan(self):
 		# pegasus-plan \
 		# 	--dir work \
@@ -426,10 +437,12 @@ class Montage:
 		# 	--cluster horizontal
 		cmd = "pegasus-plan " \
 			"--dir %s " \
-			"--relative-dir `date +'%s'` " \
+			"--relative-dir %s " \
+			"--conf %s/pegasus.properties " \
 			"--dax %s/montage.dax " \
 			"--sites condor_pool " \
-			"--output-site local --cluster horizontal" % (self.work_dir, self.folder_name, self.data_dir)
+			"--output-site local --cluster horizontal" % (os.path.dirname(self.work_dir), self.folder_name, self.data_dir, self.data_dir)
+		print(cmd)
 		if subprocess.call(cmd, shell=True) != 0:
 			print("Command failed!")
 			sys.exit(1)
@@ -445,6 +458,7 @@ def main():
 	a.generate_region_hdr()
 	a.process_color_band()
 	a.write_rc()
+	a.write_property_conf()
 	a.pegasus_plan()
 
 
