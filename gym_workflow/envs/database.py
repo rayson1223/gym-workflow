@@ -1,7 +1,6 @@
 from sqlite3 import connect, Error
 from time import sleep
-
-
+import subprocess
 # from karellen.sqlite3 import Connection, UpdateHookOps
 
 
@@ -10,21 +9,11 @@ class DatabaseEnv:
 	PEGASUS_WF_STATUS = {0: 'Complete', 2: 'Aborted'}
 
 	def __init__(self, db_dir):
+		home_dir = subprocess.getoutput("cd ~; pwd")
 		self.dbDir = db_dir
 		self.observe_wf = 0
 		self.is_done = False
-		self.conn = connect(self.dbDir)
-
-	# self.conn = connect(self.dbDir, factory=Connection)
-	# self.conn.set_update_hook(self.callback_hook)
-
-	# @staticmethod
-	# def callback_hook(conn, op, db_name, table_name, rowid):
-	# 	"""Handle notification here. Do not modify the connection!"""
-	# 	if op == UpdateHookOps.SQLITE_INSERT and self.observe_wf == rowid and table_name == "master_workflowstate":
-	# 		self.is_done = True
-	# 	s = '%s %ld of table "%s" in database "%s"' % (op, rowid, table_name, db_name)
-	# 	print(s)
+		self.conn = connect("%s/%s" % (home_dir, self.dbDir))
 
 	def observe(self, wf_id):
 		self.observe_wf = wf_id

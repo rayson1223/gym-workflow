@@ -5,6 +5,7 @@ dist
 dist/*
 build
 build/*
-gym_workflow/data/*
-gym_workflow/work/*
+agents/montage-agent-results
+data/
+work/
 __pycache__

@@ -1,7 +1,8 @@
 import calendar, time, sys, os, re, subprocess
 from astropy.io import ascii
-from auto_adag import *
+from gym_workflow.lib.montage.auto_adag import *
 from gym_workflow.lib.pegasus.DAX3 import *
+import random
 
 
 class Montage:
@@ -17,8 +18,8 @@ class Montage:
 		self.degrees = degrees  # Number of degrees of side of the output
 		self.band = band  # Band definition. Example: [dss:DSS2B:red]
 		self.tc_target = target
-		self.data_dir = os.path.dirname(os.path.dirname(os.getcwd())) + "/data"
-		self.work_dir = os.path.dirname(os.path.dirname(os.getcwd())) + "/work"
+		self.data_dir = os.getcwd() + "/data"
+		self.work_dir = os.getcwd() + "/work"
 		if os.path.exists(self.data_dir):
 			print("data directory already exists")
 		else:
@@ -30,10 +31,14 @@ class Montage:
 			os.mkdir(self.work_dir)
 			print("work directory created")
 
-		self.folder_name = calendar.timegm(time.gmtime())
+		self.folder_name = int(round(time.time() * 1000))  # calendar.timegm(time.gmtime())
 		self.data_dir = "%s/%s" % (self.data_dir, self.folder_name)
 		self.work_dir = "%s/%s" % (self.work_dir, self.folder_name)
 		os.mkdir(self.data_dir)
+		os.mkdir(self.work_dir)
+
+		self.cs = 1
+		self.cn = 1
 
 		self.dax = AutoADAG("montage")
 
@@ -50,6 +55,8 @@ class Montage:
 			Some transformations in Montage uses multiple executables
 		"""
 		exes = {}
+		self.cs = clusters_size
+		self.cn = clusters_num
 		full_path = subprocess.getoutput("which mProject")
 		if full_path is None:
 			raise RuntimeError("mProject is not in the $PATH")
@@ -196,7 +203,7 @@ class Montage:
 
 		band_id = str(band_id)
 
-		print("\nAdding band %s (%s %s -> %s)" % (band_id, survey, band, color))
+		# print("\nAdding band %s (%s %s -> %s)" % (band_id, survey, band, color))
 
 		# data find - go a little bit outside the box - see mExec implentation
 		# degrees_datafind = str(float(degrees) * 1.42)
@@ -204,7 +211,7 @@ class Montage:
 		cmd = "mArchiveList %s %s \"%s\" %s %s %s/%s-images.tbl" % (
 			survey, band, self.center, degrees_datafind, degrees_datafind, self.data_dir, band_id
 		)
-		print("Running sub command: " + cmd)
+		# print("Running sub command: " + cmd)
 		if subprocess.call(cmd, shell=True) != 0:
 			print("Command failed!")
 			sys.exit(1)
@@ -225,7 +232,7 @@ class Montage:
 		cmd = "cd %s && mDAGTbls %s-images.tbl region-oversized.hdr %s %s %s" % (
 			self.data_dir, band_id, raw_tbl.name, projected_tbl.name, corrected_tbl.name
 		)
-		print("Running sub command: " + cmd)
+		# print("Running sub command: " + cmd)
 		if subprocess.call(cmd, shell=True) != 0:
 			print("Command failed!")
 			sys.exit(1)
@@ -234,7 +241,7 @@ class Montage:
 		cmd = "cd %s && mOverlaps %s-raw.tbl %s-diffs.tbl" % (
 			self.data_dir, band_id, band_id
 		)
-		print("Running sub command: " + cmd)
+		# print("Running sub command: " + cmd)
 		if subprocess.call(cmd, shell=True) != 0:
 			print("Command failed!")
 			sys.exit(1)
@@ -445,9 +452,12 @@ class Montage:
 		# Executing pegasus-run cmd for executing planned workflow
 		cmd = "pegasus-run %s" % self.work_dir
 		print("Running Pegasus Run Cmd: %s" % cmd)
-		if subprocess.call(cmd, shell=True) != 0:
-			print("Command failed!")
-			sys.exit(1)
+
+		# Temporary disable execution
+		# if subprocess.call(cmd, shell=True) != 0:
+		# 	print("Command failed!")
+		# 	sys.exit(1)
+		return self.gen_exec_time()
 
 	def pegasus_remove(self):
 		# pegasus-remove the workflow
@@ -456,6 +466,21 @@ class Montage:
 		if subprocess.call(cmd, shell=True) != 0:
 			print("Command failed!")
 			sys.exit(1)
+
+	def gen_exec_time(self):
+		cs_degree = {
+			0.1: {
+				1: lambda: random.randrange(430, 461, 2),
+				2: lambda: random.randrange(370, 381, 2),
+				3: lambda: random.randrange(360, 371, 2),
+				4: lambda: random.randrange(340, 361, 2),
+				5: lambda: random.randrange(340, 361, 2),
+				6: lambda: random.randrange(340, 361, 2),
+				7: lambda: random.randrange(340, 361, 2),
+			}
+		}
+		return cs_degree[self.degrees][self.cs]()
+
 
 def main():
 	a = Montage()
