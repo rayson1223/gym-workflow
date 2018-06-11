@@ -428,13 +428,7 @@ class Montage:
 		fd.close()
 
 	def pegasus_plan(self):
-		# pegasus-plan \
-		# 	--dir work \
-		# 	--relative-dir `date + '%s'` \
-		# 	--dax data/montage.dax \
-		# 	--sites condor_pool \
-		# 	--output-site local \
-		# 	--cluster horizontal
+		# Run Planning the cmd after our generated dax
 		cmd = "pegasus-plan " \
 			"--dir %s " \
 			"--relative-dir %s " \
@@ -442,12 +436,26 @@ class Montage:
 			"--dax %s/montage.dax " \
 			"--sites condor_pool " \
 			"--output-site local --cluster horizontal" % (os.path.dirname(self.work_dir), self.folder_name, self.data_dir, self.data_dir)
-		print(cmd)
+		print("Getting Pegasus Plan executing cmd: %s" % cmd)
 		if subprocess.call(cmd, shell=True) != 0:
 			print("Command failed!")
 			sys.exit(1)
-		# TODO: Execute the pegasus-run that generated
 
+	def pegasus_run(self):
+		# Executing pegasus-run cmd for executing planned workflow
+		cmd = "pegasus-run %s" % self.work_dir
+		print("Running Pegasus Run Cmd: %s" % cmd)
+		if subprocess.call(cmd, shell=True) != 0:
+			print("Command failed!")
+			sys.exit(1)
+
+	def pegasus_remove(self):
+		# pegasus-remove the workflow
+		cmd = "pegasus-remove %s" % self.work_dir
+		print("Running Pegasus Remove Cmd: %s" % cmd)
+		if subprocess.call(cmd, shell=True) != 0:
+			print("Command failed!")
+			sys.exit(1)
 
 def main():
 	a = Montage()
@@ -460,6 +468,9 @@ def main():
 	a.write_rc()
 	a.write_property_conf()
 	a.pegasus_plan()
+	a.pegasus_run()
+	time.sleep(5)
+	a.pegasus_remove()
 
 
 if __name__ == "__main__":
