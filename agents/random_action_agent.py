@@ -19,26 +19,21 @@ if __name__ == '__main__':
 	outdir = './montage-agent-results'
 	# env = wrappers.Monitor(env, directory=outdir, force=True)
 	# env.seed()
-	sc = 0
-	fc = 0
-	Q = np.zeros([3, 3], int)
-	G = 0
-	alpha = 0.618
+
+	sc, fc = 0, 0
 	for i_episode in range(100):
 		done = False
 		env.reset()
 		state = env.action_space.sample()
 		print("Episode: %s" % i_episode)
 
-		while done != True:
-			action = np.argmax(Q[state])
+		for t in range(100):
+
 			print("\n" * 2)
 			env.render()
-			# action = env.action_space.sample()
+			action = env.action_space.sample()
 			state2, reward, done, info = env.step(action)
-			Q[state, action] += alpha * (reward + np.max(Q[state2]) - Q[state, action])
-			G += reward
-			state = state2
+
 			print("Current Reward: %s \t Total Reward: %s" % (reward, info))
 			if done:
 				if info > 0:

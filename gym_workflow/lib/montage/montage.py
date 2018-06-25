@@ -34,8 +34,11 @@ class Montage:
 		self.folder_name = int(round(time.time() * 1000))  # calendar.timegm(time.gmtime())
 		self.data_dir = "%s/%s" % (self.data_dir, self.folder_name)
 		self.work_dir = "%s/%s" % (self.work_dir, self.folder_name)
-		os.mkdir(self.data_dir)
-		os.mkdir(self.work_dir)
+
+		if not os.path.exists(self.data_dir):
+			os.mkdir(self.data_dir)
+		if not os.path.exists(self.work_dir):
+			os.mkdir(self.work_dir)
 
 		self.cs = 1
 		self.cn = 1
@@ -437,12 +440,13 @@ class Montage:
 	def pegasus_plan(self):
 		# Run Planning the cmd after our generated dax
 		cmd = "pegasus-plan " \
-			"--dir %s " \
-			"--relative-dir %s " \
-			"--conf %s/pegasus.properties " \
-			"--dax %s/montage.dax " \
-			"--sites condor_pool " \
-			"--output-site local --cluster horizontal" % (os.path.dirname(self.work_dir), self.folder_name, self.data_dir, self.data_dir)
+		      "--dir %s " \
+		      "--relative-dir %s " \
+		      "--conf %s/pegasus.properties " \
+		      "--dax %s/montage.dax " \
+		      "--sites condor_pool " \
+		      "--output-site local --cluster horizontal" % (
+			      os.path.dirname(self.work_dir), self.folder_name, self.data_dir, self.data_dir)
 		print("Getting Pegasus Plan executing cmd: %s" % cmd)
 		if subprocess.call(cmd, shell=True) != 0:
 			print("Command failed!")

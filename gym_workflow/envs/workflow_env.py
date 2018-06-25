@@ -122,7 +122,7 @@ class WorkflowEnv(gym.Env):
 		return None
 
 	def run_experiment(self):
-		# montage = Montage()
+		montage = Montage()
 		# montage.build_transformation_catalog(self.clusters_size)
 		# montage.generate_region_hdr()
 		# montage.process_color_band()
