@@ -164,7 +164,7 @@ class MontageWfEnv(WfEnv):
 	#
 
 	def _get_obs(self):
-		return self.clusters_size, self.clusters_num, self.last_action
+		return self.clusters_size, self.clusters_num
 
 	# return self.clusters_size, self.clusters_num, self.is_improve
 

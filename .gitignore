@@ -8,4 +8,5 @@ build/*
 agents/montage-agent-results
 data/
 work/
+results.csv
 __pycache__

@@ -2,7 +2,7 @@ import calendar, time, sys, os, re, subprocess
 from astropy.io import ascii
 from gym_workflow.lib.montage.auto_adag import *
 from gym_workflow.lib.pegasus.DAX3 import *
-import random
+import random, csv
 
 
 class Montage:
@@ -446,7 +446,7 @@ class Montage:
 		      "--dax %s/montage.dax " \
 		      "--sites condor_pool " \
 		      "--output-site local --cluster horizontal" % (
-			      os.path.dirname(self.work_dir), self.folder_name, self.data_dir, self.data_dir)
+		      os.path.dirname(self.work_dir), self.folder_name, self.data_dir, self.data_dir)
 		print("Getting Pegasus Plan executing cmd: %s" % cmd)
 		if subprocess.call(cmd, shell=True) != 0:
 			print("Command failed!")
@@ -458,10 +458,11 @@ class Montage:
 		print("Running Pegasus Run Cmd: %s" % cmd)
 
 		# Temporary disable execution
-		# if subprocess.call(cmd, shell=True) != 0:
-		# 	print("Command failed!")
-		# 	sys.exit(1)
-		return self.gen_exec_time()
+		if subprocess.call(cmd, shell=True) != 0:
+			print("Command failed!")
+			sys.exit(1)
+
+	# return self.gen_exec_time()
 
 	def pegasus_remove(self):
 		# pegasus-remove the workflow
@@ -485,6 +486,19 @@ class Montage:
 		}
 		return cs_degree[self.degrees][self.cs]()
 
+	def write_record(self, cs, cn):
+		if not os.path.exists(os.getcwd() + "/results.csv"):
+			with open(os.getcwd() + "/results.csv", 'w', newline='', encoding='utf-8') as r:
+				fieldnames = [
+					'center', 'degree', 'band', 'folder_name', 'cluster_size', 'cluster_num', 'exec_time', 'wall_time',
+					'cum_wall_time'
+				]
+				writer = csv.DictWriter(r, fieldnames=fieldnames)
+				writer.writeheader()
+
+		with open('results.csv', 'a') as r:
+			writer = csv.writer(r)
+			writer.writerow([self.center, self.degrees, self.band, self.folder_name, cs, cn, 0, 0, 0])
 
 def main():
 	a = Montage()

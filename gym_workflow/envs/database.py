@@ -15,7 +15,8 @@ class DatabaseEnv:
 		self.is_done = False
 		self.conn = connect("%s/%s" % (home_dir, self.dbDir))
 
-	def observe(self, wf_id):
+	def observe(self, wf_target):
+		wf_id = self.getone("select wf_id from master_workflow where submit_dir='%s';" % wf_target)
 		self.observe_wf = wf_id
 		while True:
 			res = self.getone(
