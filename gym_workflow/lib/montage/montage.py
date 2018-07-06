@@ -1,8 +1,14 @@
-import calendar, time, sys, os, re, subprocess
+import calendar
+import time
+import sys
+import os
+import re
+import subprocess
 from astropy.io import ascii
 from gym_workflow.lib.montage.auto_adag import *
 from gym_workflow.lib.pegasus.DAX3 import *
-import random, csv
+import random
+import csv
 
 
 class Montage:
@@ -10,8 +16,8 @@ class Montage:
 	replica_catalog = {}
 
 	def __init__(
-			self, type="2mass", center="15.09552 -0.74559",
-			degrees=0.1, band=["2mass:j:red"], target="regular"
+		self, type="2mass", center="15.09552 -0.74559",
+		degrees=0.1, band=["2mass:j:red"], target="regular"
 	):
 		self.montage_type = type
 		self.center = center  # Center of the output, for example M17 or 56.5 23.75
@@ -446,7 +452,8 @@ class Montage:
 		      "--dax %s/montage.dax " \
 		      "--sites condor_pool " \
 		      "--output-site local --cluster horizontal" % (
-		      os.path.dirname(self.work_dir), self.folder_name, self.data_dir, self.data_dir)
+			      os.path.dirname(self.work_dir), self.folder_name, self.data_dir, self.data_dir
+		      )
 		print("Getting Pegasus Plan executing cmd: %s" % cmd)
 		if subprocess.call(cmd, shell=True) != 0:
 			print("Command failed!")
@@ -499,6 +506,7 @@ class Montage:
 		with open('results.csv', 'a') as r:
 			writer = csv.writer(r)
 			writer.writerow([self.center, self.degrees, self.band, self.folder_name, cs, cn, 0, 0, 0])
+
 
 def main():
 	a = Montage()

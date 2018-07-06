@@ -19,18 +19,7 @@ __author__ = 'Rajiv Mayani'
 import logging
 import sys
 import subprocess
-from gym_workflow.lib.pegasus.DAX3 import ADAG, Job, File, Executable, PFN, Link, When, DuplicateError
-
-try:
-	path = subprocess.getoutput("pegasus-config --python").split("\n")
-	if path.__len__() > 1:
-		sys.path.append(path[-1])
-	else:
-		# TODO: Potential bugs that this env no python at all, which len = 0
-		sys.path.append(path[0])
-	# from Pegasus.DAX3 import ADAG, Job, File, Executable, PFN, Link, When, DuplicateError
-except ImportError as e:
-	print('Include Pegasus Python libraries in your PYTHONPATH')
+from gym_workflow.lib.pegasus.DAX3 import *
 
 
 class AutoADAG(ADAG):
