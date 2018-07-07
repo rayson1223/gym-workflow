@@ -494,18 +494,29 @@ class Montage:
 		return cs_degree[self.degrees][self.cs]()
 
 	def write_record(self, cs, cn):
-		if not os.path.exists(os.getcwd() + "/results.csv"):
-			with open(os.getcwd() + "/results.csv", 'w', newline='', encoding='utf-8') as r:
+		if not os.path.exists(os.getcwd() + "/workflow_record.csv"):
+			with open(os.getcwd() + "/workflow_record.csv", 'w', newline='', encoding='utf-8') as r:
+				# fieldnames = [
+				# 	'center', 'degree', 'band', 'folder_name', 'cluster_size', 'cluster_num', 'exec_time', 'wall_time',
+				# 	'cum_wall_time'
+				# ]
 				fieldnames = [
-					'center', 'degree', 'band', 'folder_name', 'cluster_size', 'cluster_num', 'exec_time', 'wall_time',
-					'cum_wall_time'
+					'submit_dir', 'cluster_size', 'cluster_num'
 				]
 				writer = csv.DictWriter(r, fieldnames=fieldnames)
 				writer.writeheader()
 
-		with open('results.csv', 'a') as r:
+		with open('workflow_record.csv', 'a') as r:
 			writer = csv.writer(r)
-			writer.writerow([self.center, self.degrees, self.band, self.folder_name, cs, cn, 0, 0, 0])
+			writer.writerow([self.work_dir, cs, cn])
+
+	def build(self, cluster_size=1, cluster_number=1):
+		self.build_transformation_catalog(cluster_size, cluster_number)
+		self.generate_region_hdr()
+		self.process_color_band()
+		self.write_rc()
+		self.write_property_conf()
+		self.pegasus_plan()
 
 
 def main():
