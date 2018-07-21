@@ -92,7 +92,7 @@ class MontageWfEnv(WfEnv):
 			reward -= 1.0
 			self.clusters_size = 1
 		else:
-			res = self.run_experiment()
+			res = self.run_experiment(self.clusters_size)
 			self.exec_time = res
 
 			"""
@@ -172,12 +172,12 @@ class MontageWfEnv(WfEnv):
 		# Determine whether should increase level of difficulty
 		return None
 
-	def run_experiment(self):
+	def run_experiment(self, cs):
 		montage = Montage()
-		montage.build_transformation_catalog(self.clusters_size)
+		# montage.build_transformation_catalog(self.clusters_size)
 		# montage.generate_region_hdr()
 		# montage.process_color_band()
 		# montage.write_rc()
 		# montage.write_property_conf()
 		# montage.pegasus_plan()
-		return montage.pegasus_run()
+		return montage.gen_exec_time(cs)

@@ -479,7 +479,7 @@ class Montage:
 			print("Command failed!")
 			sys.exit(1)
 
-	def gen_exec_time(self):
+	def gen_exec_time(self, cs):
 		cs_degree = {
 			0.1: {
 				1: lambda: random.randrange(430, 461, 2),
@@ -491,7 +491,7 @@ class Montage:
 				7: lambda: random.randrange(340, 361, 2),
 			}
 		}
-		return cs_degree[self.degrees][self.cs]()
+		return cs_degree[self.degrees][cs]()
 
 	def write_record(self, cs, cn):
 		if not os.path.exists(os.getcwd() + "/workflow_record.csv"):
