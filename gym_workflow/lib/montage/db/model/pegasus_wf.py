@@ -113,6 +113,7 @@ class PegasusWf:
 			return None
 
 	def get_job_distribution_stat(self):
+		""" https://confluence.pegasus.isi.edu/display/pegasus/Additional+queries """
 		return self.stampede_db.getall(
 			"""
 				SELECT transformation,

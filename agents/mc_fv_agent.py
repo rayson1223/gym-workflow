@@ -1,15 +1,14 @@
+import sys
+from collections import defaultdict
+import itertools
 from gym import make
 import gym_workflow.envs
-from collections import defaultdict
+import agents.utils.plotting as plt
+from collections import namedtuple
 import numpy as np
-import sys
-import matplotlib
-import random
-
-# matplotlib.use('ggplot')
 
 if __name__ == '__main__':
-	env = make('Montage-v0')
+	env = make('Montage-v3')
 	last_exec = 0
 
 
@@ -39,6 +38,13 @@ if __name__ == '__main__':
 		# The final value function
 		V = defaultdict(float)
 
+		# EpisodeStats = namedtuple("Stats", ["episode_states", "episode_actions", "episode_rewards"])
+		# stats = EpisodeStats(
+		# 	episode_states=np.zeros(num_episodes),
+		# 	episode_actions=np.zeros(num_episodes),
+		# 	episode_rewards=np.zeros(num_episodes)
+		# )
+
 		for i_episode in range(1, num_episodes + 1):
 			# Print out which episode we're on, useful for debugging.
 			if i_episode % 1000 == 0:
@@ -52,7 +58,10 @@ if __name__ == '__main__':
 			for t in range(100):
 				action = policy(state, env)
 				next_state, reward, done, _ = env.step(action)
-				episode.append((state, action, reward))
+				episode.append((next_state, action, reward))
+				# stats.episode_states[i_episode] = state
+				# stats.episode_actions[i_episode] = action
+				# stats.episode_rewards[i_episode] = reward
 				if done:
 					break
 				state = next_state
@@ -73,10 +82,6 @@ if __name__ == '__main__':
 		return V
 
 
-	def calc_lb_hb(v, p):
-		return (v * (100 - p)) / 100, (v * (p + 100)) / 100
-
-
 	def wf_policy(observation, env):
 		# Depend on the observation what actions I should be doing
 		# cs, cn, im = observation
@@ -84,39 +89,7 @@ if __name__ == '__main__':
 		return env.action_space.sample()
 
 
-	def plot_value_function(V, title="Value Function"):
-		"""
-		Plots the value function as a surface plot.
-		"""
-		min_x = min(k[0] for k in V.keys())
-		max_x = max(k[0] for k in V.keys())
-		min_y = min(k[1] for k in V.keys())
-		max_y = max(k[1] for k in V.keys())
-
-		x_range = np.arange(min_x, max_x + 1)
-		y_range = np.arange(min_y, max_y + 1)
-		X, Y = np.meshgrid(x_range, y_range)
-
-		# Find value for all (x, y) coordinates
-		Z_noace = np.apply_along_axis(lambda _: V[(_[0], _[1], False)], 2, np.dstack([X, Y]))
-		Z_ace = np.apply_along_axis(lambda _: V[(_[0], _[1], True)], 2, np.dstack([X, Y]))
-
-		def plot_surface(X, Y, Z, title):
-			fig = plt.figure(figsize=(20, 10))
-			ax = fig.add_subplot(111, projection='3d')
-			surf = ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=matplotlib.cm.coolwarm, vmin=-1.0, vmax=1.0)
-			ax.set_xlabel('Player Sum')
-			ax.set_ylabel('Dealer Showing')
-			ax.set_zlabel('Value')
-			ax.set_title(title)
-			ax.view_init(ax.elev, -120)
-			fig.colorbar(surf)
-			plt.show()
-
-		plot_surface(X, Y, Z_noace, "{} (No Usable Ace)".format(title))
-		plot_surface(X, Y, Z_ace, "{} (Usable Ace)".format(title))
-
-
-	V_10k = mc_prediction(wf_policy, env, num_episodes=1000)
+	V_10k = mc_prediction(wf_policy, env, num_episodes=10000)
 	print(V_10k)
-# plot_value_function(V_10k, title="10 Steps")
+
+	plt.plot_value_function(V_10k, title="1st Attempt: Monte Carlo with {} episodes".format(100000))
