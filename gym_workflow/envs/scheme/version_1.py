@@ -1,8 +1,41 @@
 from gym_workflow.envs.montage_wf_env import MontageWfEnv
+from gym_workflow.envs.database import DatabaseEnv
+from gym.spaces import Discrete, Tuple
 
 
 class Version1(MontageWfEnv):
-	# def _reset(self):
+	def __init__(self, degree=0.1, band_num=1, db_dir=".pegasus/workflow.db"):
+		# Montage Experiment Variable
+		super(Version1, self).__init__()
+		self.degree = degree
+		self.clusters_size = 1
+		self.clusters_num = 1
+		self.is_clusters_size = True
+		self.is_clusters_num = False
+		self.band_num = band_num
+
+		# Setting database connection
+		self.db = DatabaseEnv(db_dir)
+
+		self.action_space = Discrete(5)
+
+		self.observation_space = Discrete(8), Discrete(8), Discrete(3)
+
+		# Episode Conf
+		# Best exec_time: None or 1, depends on reward version
+		self.best_exec_time = None
+		self.last_exec_time = None
+		self.last_action = None
+		self.last_reward = None
+		self.total_reward = 0.0
+		# 0: Ntg, 1: improve, 2: degrade
+		self.is_improve = 0
+		self.seed()
+		self.reset()
+
+		# @version 4.0 Config
+		self.worst_exec_time = None
+		self.exec_time_records = None
 
 	"""
 		@version 1: Failed

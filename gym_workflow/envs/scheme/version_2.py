@@ -1,14 +1,43 @@
 from gym_workflow.envs.montage_wf_env import MontageWfEnv
+from gym_workflow.envs.database import DatabaseEnv
+from gym.spaces import Discrete, Tuple
 
 
 class Version2(MontageWfEnv):
-	# def _reset(self):
-
 	"""
 		@version 2: Greedy Approach --> Proved method correct, reward wrong
 		- Known fact that best exec time is 100
 		All actions will be given -1, goal to find the lowest 2nd score
 	"""
+
+	def __init__(self, degree=0.1, band_num=1, db_dir=".pegasus/workflow.db"):
+		# Montage Experiment Variable
+		super(Version2, self).__init__()
+		self.degree = degree
+		self.clusters_size = 1
+		self.clusters_num = 1
+		self.is_clusters_size = True
+		self.is_clusters_num = False
+		self.band_num = band_num
+
+		# Setting database connection
+		self.db = DatabaseEnv(db_dir)
+
+		self.action_space = Discrete(5)
+
+		self.observation_space = Discrete(8), Discrete(8), Discrete(3)
+
+		# Episode Conf
+		# Best exec_time: None or 1, depends on reward version
+		self.best_exec_time = None
+		self.last_exec_time = None
+		self.last_action = None
+		self.last_reward = None
+		self.total_reward = 0.0
+		# 0: Ntg, 1: improve, 2: degrade
+		self.is_improve = 0
+		self.seed()
+		self.reset()
 
 	def step(self, action):
 		assert self.action_space.contains(action)

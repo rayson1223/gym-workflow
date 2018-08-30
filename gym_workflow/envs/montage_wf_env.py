@@ -1,11 +1,5 @@
 import gym
 from gym.utils import seeding
-from gym.spaces import Discrete, Tuple
-from .database import DatabaseEnv
-from io import StringIO
-import sys
-import random
-import numpy as np
 from gym_workflow.lib.montage.montage import Montage
 
 
@@ -23,6 +17,15 @@ class WfEnv(gym.Env):
 	def _seed(self, seed=None):
 		self.np_random, seed = seeding.np_random(seed)
 		return [seed]
+
+	def step(self, action):
+		pass
+
+	def reset(self):
+		pass
+
+	def render(self, mode='human'):
+		pass
 
 
 class MontageWfEnv(WfEnv):
@@ -66,39 +69,6 @@ class MontageWfEnv(WfEnv):
 						- Or any other regression algorithms
 						- Compare in regression methodology where it's has a fair stand
 		"""
-
-	def __init__(self, degree=0.1, band_num=1, db_dir=".pegasus/workflow.db"):
-		# Montage Experiment Variable
-		super(MontageWfEnv, self).__init__()
-		self.degree = degree
-		self.clusters_size = 1
-		self.clusters_num = 1
-		self.is_clusters_size = True
-		self.is_clusters_num = False
-		self.band_num = band_num
-
-		# Setting database connection
-		self.db = DatabaseEnv(db_dir)
-
-		self.action_space = Discrete(5)
-
-		self.observation_space = Discrete(8), Discrete(8), Discrete(3)
-
-		# Episode Conf
-		# Best exec_time: None or 1, depends on reward version
-		self.best_exec_time = None
-		self.last_exec_time = None
-		self.last_action = None
-		self.last_reward = None
-		self.total_reward = 0.0
-		# 0: Ntg, 1: improve, 2: degrade
-		self.is_improve = 0
-		self.seed()
-		self.reset()
-
-		# @version 4.0 Config
-		self.worst_exec_time = None
-		self.exec_time_records = None
 
 	def step(self, action):
 		raise NotImplementedError

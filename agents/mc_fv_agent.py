@@ -8,10 +8,6 @@ from collections import namedtuple
 import numpy as np
 
 if __name__ == '__main__':
-	env = make('Montage-v3')
-	last_exec = 0
-
-
 	# Author: dennybritz
 	# From URL: https://github.com/dennybritz/reinforcement-learning/blob/master/MC/MC%20Prediction%20Solution.ipynb
 	def mc_prediction(policy, env, num_episodes, discount_factor=1.0):
@@ -89,7 +85,11 @@ if __name__ == '__main__':
 		return env.action_space.sample()
 
 
-	V_10k = mc_prediction(wf_policy, env, num_episodes=10000)
+	env = make('Montage-v4')
+	episodes = 1000000
+	env.configure(records=int(episodes * 10 / 100))
+
+	V_10k = mc_prediction(wf_policy, env, num_episodes=episodes)
 	print(V_10k)
 
 	plt.plot_value_function(V_10k, title="1st Attempt: Monte Carlo with {} episodes".format(100000))
