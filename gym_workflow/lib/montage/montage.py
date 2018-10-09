@@ -7,6 +7,7 @@ import subprocess
 from astropy.io import ascii
 from gym_workflow.lib.montage.auto_adag import *
 from gym_workflow.lib.pegasus.DAX3 import *
+from gym_workflow.lib.montage.db.model.pegasus_wf import PegasusWf
 import random
 import csv
 
@@ -14,7 +15,7 @@ import csv
 class Montage:
 	common_files = {}
 	replica_catalog = {}
-
+	
 	def __init__(
 		self, type="2mass", center="15.09552 -0.74559",
 		degrees=0.1, band=["2mass:j:red"], target="regular"
@@ -36,21 +37,21 @@ class Montage:
 		else:
 			os.mkdir(self.work_dir)
 			print("work directory created")
-
+		
 		self.folder_name = int(round(time.time() * 1000))  # calendar.timegm(time.gmtime())
 		self.data_dir = "%s/%s" % (self.data_dir, self.folder_name)
 		self.work_dir = "%s/%s" % (self.work_dir, self.folder_name)
-
+		
 		if not os.path.exists(self.data_dir):
 			os.mkdir(self.data_dir)
 		if not os.path.exists(self.work_dir):
 			os.mkdir(self.work_dir)
-
+		
 		self.cs = 1
 		self.cn = 1
-
+		
 		self.dax = AutoADAG("montage")
-
+	
 	# Setup Mail Notification
 	# share_dir = \
 	# subprocess.Popen("pegasus-config --sh-dump | grep ^PEGASUS_SHARE_DIR= | sed -e 's/.*=//' -e 's/\"//g'", shell=True, stdout=subprocess.PIPE).communicate()[0]
@@ -58,7 +59,7 @@ class Montage:
 	# self.dax.invoke('start', share_dir + "/notification/email")
 	# self.dax.invoke('on_error', share_dir + "/notification/email")
 	# self.dax.invoke('on_success', share_dir + "/notification/email --report=pegasus-statistics")
-
+	
 	def build_transformation_catalog(self, clusters_size=1, clusters_num=1):
 		"""
 			Some transformations in Montage uses multiple executables
@@ -70,7 +71,7 @@ class Montage:
 		if full_path is None:
 			raise RuntimeError("mProject is not in the $PATH")
 		base_dir = os.path.dirname(full_path)
-
+		
 		f = open(self.data_dir + "/tc.txt", "w")
 		if self.tc_target == "container":
 			f.write("cont montage {\n")
@@ -78,7 +79,7 @@ class Montage:
 			f.write("   image \"shub://pegasus-isi/montage-workflow-v2\"\n")
 			f.write("   profile env \"MONTAGE_HOME\" \"/opt/Montage\"\n")
 			f.write("}\n")
-
+		
 		for fname in os.listdir(base_dir):
 			if fname[0] == ".":
 				continue
@@ -98,7 +99,7 @@ class Montage:
 				f.write("    type \"INSTALLED\"\n")
 				f.write("    container \"montage\"\n")
 				f.write("    pfn \"file://%s/%s\"\n" % (base_dir, fname))
-
+			
 			# Control what kind of jobs use clustering
 			if fname in ["mProject", "mDiff", "mDiffFit", "mBackground"]:
 				# TODO: Customize the clustering by configuration
@@ -112,7 +113,7 @@ class Montage:
 				#   The clusters.size factor associated with job B for siteX is say 3. This will result in 2 clustered jobs,
 				#   one composed of 3 jobs and another of 2 jobs.
 				f.write("    profile pegasus \"clusters.size\" \"%s\"\n" % clusters_size)
-
+			
 			# 2) clusters.num factor
 			#
 			# The clusters.num factor denotes how many clustered jobs does the user want to see per level per site.
@@ -121,13 +122,13 @@ class Montage:
 			#   if at a particular level, say 4 jobs referring to logical transformation B have been scheduled to a siteX.
 			#   The 'clusters.num' factor associated with job B for siteX is say 3.
 			#   This will result in 3 clustered jobs, one composed of 2 jobs and others of a single job each.
-
+			
 			# Runtime clustering
 			# f.write("    profile pegasus \"runtime\" \"100\"\n")
 			f.write("  }\n")
 			f.write("}\n")
 		f.close()
-
+		
 		# some Montage tools depend on other tools
 		for tname in ["mDiffFit"]:
 			t = Transformation(tname)
@@ -136,18 +137,18 @@ class Montage:
 				t.uses(Executable("mFitplane"))
 			t.uses(Executable("mDiffFit"))
 			self.dax.addTransformation(t)
-
+	
 	def generate_region_hdr(self):
 		global common_files
-
+		
 		(crval1, crval2) = self.center.split()
 		crval1 = float(crval1)
 		crval2 = float(crval2)
-
+		
 		cdelt = 0.000277778
 		naxis = int((float(self.degrees) / cdelt) + 0.5)
 		crpix = (naxis + 1) / 2.0
-
+		
 		f = open("%s/region.hdr" % self.data_dir, "w")
 		f.write("SIMPLE  = T\n")
 		f.write("BITPIX  = -64\n")
@@ -166,10 +167,10 @@ class Montage:
 		f.write("EQUINOX = %d\n" % (2000))
 		f.write("END\n")
 		f.close()
-
+		
 		self.common_files["region.hdr"] = File("region.hdr")
 		self.replica_catalog["region.hdr"] = {"url": "file://" + self.data_dir + "/region.hdr", "site_label": "local"}
-
+		
 		# we also need an oversized region which will be used in the first part of the
 		# workflow to get the background correction correct
 		f = open("%s/region-oversized.hdr" % self.data_dir, "w")
@@ -190,11 +191,11 @@ class Montage:
 		f.write("EQUINOX = %d\n" % (2000))
 		f.write("END\n")
 		f.close()
-
+		
 		self.common_files["region-oversized.hdr"] = File("region-oversized.hdr")
 		self.replica_catalog["region-oversized.hdr"] = \
 			{"url": "file://" + self.data_dir + "/region-oversized.hdr", "site_label": "local"}
-
+	
 	def process_color_band(self):
 		band_id = 0
 		color_band = {}
@@ -203,17 +204,17 @@ class Montage:
 			(survey, band, color) = band_def.split(":")
 			self.add_band(band_id, survey, band, color)
 			color_band[color] = band_id
-
+		
 		# if we have 3 bands in red, blue, green, try to create a color jpeg
 		if 'red' in color_band and 'green' in color_band and 'blue' in color_band:
 			self.color_jpg(color_band['red'], color_band['green'], color_band['blue'])
-
+	
 	def add_band(self, band_id, survey, band, color):
-
+		
 		band_id = str(band_id)
-
+		
 		# print("\nAdding band %s (%s %s -> %s)" % (band_id, survey, band, color))
-
+		
 		# data find - go a little bit outside the box - see mExec implentation
 		# degrees_datafind = str(float(degrees) * 1.42)
 		degrees_datafind = str(float(self.degrees))
@@ -227,7 +228,7 @@ class Montage:
 		self.replica_catalog["%s-images.tbl" % (band_id)] = {
 			"url": "file://%s/%s-images.tbl" % (self.data_dir, band_id), "site_label": "local"
 		}
-
+		
 		# image tables
 		raw_tbl = File("%s-raw.tbl" % (band_id))
 		self.replica_catalog[raw_tbl.name] = \
@@ -245,7 +246,7 @@ class Montage:
 		if subprocess.call(cmd, shell=True) != 0:
 			print("Command failed!")
 			sys.exit(1)
-
+		
 		# diff table
 		cmd = "cd %s && mOverlaps %s-raw.tbl %s-diffs.tbl" % (
 			self.data_dir, band_id, band_id
@@ -254,10 +255,10 @@ class Montage:
 		if subprocess.call(cmd, shell=True) != 0:
 			print("Command failed!")
 			sys.exit(1)
-
+		
 		# statfile table
 		t = ascii.read("%s/%s-diffs.tbl" % (self.data_dir, band_id))
-
+		
 		# make sure we have a wide enough column
 		t['stat'] = "                                                                  "
 		for row in t:
@@ -267,16 +268,16 @@ class Montage:
 		self.replica_catalog["%s-stat.tbl" % (band_id)] = {
 			"url": "file://%s/%s-stat.tbl" % (self.data_dir, band_id), "site_label": "local"
 		}
-
+		
 		# for all the input images in this band, and them to the rc, and
 		# add reproject tasks
 		data = ascii.read("%s/%s-images.tbl" % (self.data_dir, band_id))
 		for row in data:
 			base_name = re.sub("\.fits.*", "", row['file'])
-
+			
 			# add an entry to the replica catalog
 			self.replica_catalog[base_name + ".fits"] = {"url": row['URL'], "site_label": "ipac"}
-
+			
 			# projection job
 			j = Job(name="mProject")
 			in_fits = File(base_name + ".fits")
@@ -288,12 +289,12 @@ class Montage:
 			j.uses(area_fits, link=Link.OUTPUT, transfer=False)
 			j.addArguments("-X", in_fits, projected_fits, self.common_files["region-oversized.hdr"])
 			self.dax.addJob(j)
-
+		
 		fit_txts = []
 		data = ascii.read("%s/%s-diffs.tbl" % (self.data_dir, band_id))
 		for row in data:
 			base_name = re.sub("(diff\.|\.fits.*)", "", row['diff'])
-
+			
 			# mDiffFit job
 			j = Job(name="mDiffFit")
 			plus = File("p" + row['plus'])
@@ -312,7 +313,7 @@ class Montage:
 			j.addArguments("-d", "-s", fit_txt, plus, minus, diff_fits, self.common_files["region-oversized.hdr"])
 			self.dax.addJob(j)
 			fit_txts.append(fit_txt)
-
+		
 		# mConcatFit
 		j = Job(name="mConcatFit")
 		stat_tbl = File("%s-stat.tbl" % (band_id))
@@ -325,7 +326,7 @@ class Montage:
 			j.uses(fit_txt, link=Link.INPUT)
 		j.addArguments(".")
 		self.dax.addJob(j)
-
+		
 		# mBgModel
 		j = Job(name="mBgModel")
 		j.addArguments("-i", "100000")
@@ -338,12 +339,12 @@ class Montage:
 		j.uses(corrections_tbl, link=Link.OUTPUT, transfer=False)
 		j.addArguments(corrections_tbl)
 		self.dax.addJob(j)
-
+		
 		# mBackground
 		data = ascii.read("%s/%s-raw.tbl" % (self.data_dir, band_id))
 		for row in data:
 			base_name = re.sub("(diff\.|\.fits.*)", "", row['file'])
-
+			
 			# mBackground job
 			j = Job(name="mBackground")
 			projected_fits = File("p" + base_name + ".fits")
@@ -358,7 +359,7 @@ class Montage:
 			j.uses(corrected_area, link=Link.OUTPUT, transfer=False)
 			j.addArguments("-t", projected_fits, corrected_fits, projected_tbl, corrections_tbl)
 			self.dax.addJob(j)
-
+		
 		# mImgtbl - we need an updated corrected images table because the pixel offsets and sizes need
 		# to be exactly right and the original is only an approximation
 		j = Job(name="mImgtbl")
@@ -372,7 +373,7 @@ class Montage:
 			projected_fits = File(base_name + ".fits")
 			j.uses(projected_fits, link=Link.INPUT)
 		self.dax.addJob(j)
-
+		
 		# mAdd
 		j = Job(name="mAdd")
 		mosaic_fits = File("%s-mosaic.fits" % (band_id))
@@ -390,7 +391,7 @@ class Montage:
 			j.uses(corrected_fits, link=Link.INPUT)
 			j.uses(corrected_area, link=Link.INPUT)
 		self.dax.addJob(j)
-
+		
 		# mJPEG - Make the JPEG for this channel
 		j = Job(name="mJPEG")
 		mosaic_jpg = File("%s-mosaic.jpg" % (band_id))
@@ -398,12 +399,12 @@ class Montage:
 		j.uses(mosaic_jpg, link=Link.OUTPUT, transfer=True)
 		j.addArguments("-ct", "0", "-gray", mosaic_fits, "0s", "99.999%", "gaussian", "-out", mosaic_jpg)
 		self.dax.addJob(j)
-
+	
 	def color_jpg(self, red_id, green_id, blue_id):
 		red_id = str(red_id)
 		green_id = str(green_id)
 		blue_id = str(blue_id)
-
+		
 		# mJPEG - Make the JPEG for this channel
 		j = Job(name="mJPEG")
 		mosaic_jpg = File("mosaic-color.jpg")
@@ -420,18 +421,18 @@ class Montage:
 			"-blue", blue_fits, "-1s", "99.999%", "gaussian-log", \
 			"-out", mosaic_jpg)
 		self.dax.addJob(j)
-
+	
 	def write_rc(self):
 		# write out the replica catalog
 		fd = open("%s/rc.txt" % self.data_dir, "w")
 		for lfn, data in self.replica_catalog.items():
 			fd.write("%s \"%s\"  pool=\"%s\"\n" % (lfn, data['url'], data['site_label']))
 		fd.close()
-
+		
 		fd = open("%s/montage.dax" % self.data_dir, "w")
 		self.dax.writeXML(fd)
 		fd.close()
-
+	
 	def write_property_conf(self):
 		fd = open("%s/pegasus.properties" % self.data_dir, "w")
 		fd.write("pegasus.metrics.app = Montage\n")
@@ -442,7 +443,7 @@ class Montage:
 		fd.write("pegasus.data.configuration = condorio\n")
 		fd.write("pegasus.gridstart.arguments = -f\n")
 		fd.close()
-
+	
 	def pegasus_plan(self):
 		# Run Planning the cmd after our generated dax
 		cmd = "pegasus-plan " \
@@ -458,19 +459,17 @@ class Montage:
 		if subprocess.call(cmd, shell=True) != 0:
 			print("Command failed!")
 			sys.exit(1)
-
+	
 	def pegasus_run(self):
 		# Executing pegasus-run cmd for executing planned workflow
 		cmd = "pegasus-run %s" % self.work_dir
 		print("Running Pegasus Run Cmd: %s" % cmd)
-
+		
 		# Temporary disable execution
 		if subprocess.call(cmd, shell=True) != 0:
 			print("Command failed!")
 			sys.exit(1)
-
-	# return self.gen_exec_time()
-
+	
 	def pegasus_remove(self):
 		# pegasus-remove the workflow
 		cmd = "pegasus-remove %s" % self.work_dir
@@ -478,7 +477,35 @@ class Montage:
 		if subprocess.call(cmd, shell=True) != 0:
 			print("Command failed!")
 			sys.exit(1)
-
+	
+	def pegasus_status(self):
+		cmd = "pegasus-status -l %s" % self.work_dir
+		return subprocess.getoutput(cmd)
+	
+	def monitor_experiment_completion(self):
+		complete = False
+		while True:
+			out = self.pegasus_status()
+			target_index = 0
+			for index, line in enumerate(out.splitlines()):
+				if "%DONE" in line:
+					target_index = index + 1
+			final_line = out.splitlines()[target_index].split()
+			if float(final_line[7]) == 100.0 or final_line[8].lower() == 'success':
+				complete = True
+				break
+			elif final_line[8].lower() == 'failure':
+				break
+			else:
+				# print("Status: %s, %s" % (final_line[7], final_line[8]))
+				time.sleep(300)
+		return complete
+	
+	def get_results(self):
+		wf = PegasusWf()
+		wf.initialize_by_work_dir(self.work_dir)
+		return wf.get_jobs_run_by_time(), wf.get_wall_time(), wf.get_cum_time()
+	
 	@staticmethod
 	def gen_exec_time(cs, cn):
 		cs_degree = {
@@ -806,7 +833,7 @@ class Montage:
 			}
 		}
 		return cs_degree[0.1][cs][cn]()
-
+	
 	@staticmethod
 	def gen_static_exec_time(cs, cn):
 		"""
@@ -938,7 +965,7 @@ class Montage:
 			}
 		}
 		return cs_degree[0.1][cs][cn]
-
+	
 	def write_record(self, cs, cn):
 		if not os.path.exists(os.getcwd() + "/workflow_record.csv"):
 			with open(os.getcwd() + "/workflow_record.csv", 'w', newline='', encoding='utf-8') as r:
@@ -951,11 +978,11 @@ class Montage:
 				]
 				writer = csv.DictWriter(r, fieldnames=fieldnames)
 				writer.writeheader()
-
+		
 		with open('workflow_record.csv', 'a') as r:
 			writer = csv.writer(r)
 			writer.writerow([self.work_dir, cs, cn])
-
+	
 	def build(self, cluster_size=1, cluster_number=1):
 		self.build_transformation_catalog(cluster_size, cluster_number)
 		self.generate_region_hdr()
@@ -967,15 +994,7 @@ class Montage:
 
 def main():
 	a = Montage()
-	# Can pass (clusters.size, clusters.num) into method
-	a.build_transformation_catalog()
-
-	# region.hdr is the template for the output area
-	a.generate_region_hdr()
-	a.process_color_band()
-	a.write_rc()
-	a.write_property_conf()
-	a.pegasus_plan()
+	a.build()
 	a.pegasus_run()
 	time.sleep(5)
 	a.pegasus_remove()

@@ -83,13 +83,12 @@ if __name__ == '__main__':
 		# cs, cn, im = observation
 
 		return env.action_space.sample()
-
-
-	env = make('Montage-v4')
-	episodes = 1000000
-	env.configure(records=int(episodes * 10 / 100))
+	
+	
+	env = make('Montage-v3')
+	episodes = 10000
 
 	V_10k = mc_prediction(wf_policy, env, num_episodes=episodes)
 	print(V_10k)
-
-	plt.plot_value_function(V_10k, title="1st Attempt: Monte Carlo with {} episodes".format(100000))
+	
+	plt.plot_value_function(V_10k, title="Monte Carlo First Visit with {} episodes".format(100000))

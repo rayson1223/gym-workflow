@@ -1,29 +1,30 @@
 import gym
 from gym.utils import seeding
 from gym_workflow.lib.montage.montage import Montage
+import time
 
 
 class WfEnv(gym.Env):
 	# General Workflow Environment
 	metadata = {'render.modes': ['human', 'ansi']}
-
+	
 	def __init__(self):
 		# General Attributes where workflow is always capture
 		self.exec_time = None
 		self.wall_time = None
 		self.cum_wall_time = None
 		self._seed()
-
+	
 	def _seed(self, seed=None):
 		self.np_random, seed = seeding.np_random(seed)
 		return [seed]
-
+	
 	def step(self, action):
 		pass
-
+	
 	def reset(self):
 		pass
-
+	
 	def render(self, mode='human'):
 		pass
 
@@ -69,36 +70,43 @@ class MontageWfEnv(WfEnv):
 						- Or any other regression algorithms
 						- Compare in regression methodology where it's has a fair stand
 		"""
-
+	
 	def step(self, action):
 		raise NotImplementedError
-
+	
 	def reset(self):
 		raise NotImplementedError
-
+	
 	def render(self, mode='human'):
 		raise NotImplementedError
-
+	
 	def _get_obs(self):
-		return self.clusters_size, self.clusters_num
-
+		raise NotImplemented
+	
 	def increase_level(self):
 		# Determine whether should increase level of difficulty
 		raise NotImplemented
-
+	
 	@staticmethod
 	def run_static_experiment(cs, cn):
 		return Montage.gen_static_exec_time(cs, cn)
-
+	
 	@staticmethod
 	def run_gen_experiment(cs, cn):
 		return Montage.gen_exec_time(cs, cn)
-
-	def run_experiment(self):
+	
+	@staticmethod
+	def run_experiment(cs, cn):
 		montage = Montage()
-		montage.build_transformation_catalog(self.clusters_size, self.clusters_num)
-		montage.generate_region_hdr()
-		montage.process_color_band()
-		montage.write_rc()
-		montage.write_property_conf()
-		montage.pegasus_plan()
+		montage.build(cs, cn)
+		montage.pegasus_run()
+		# Wait for the job submission status
+		time.sleep(5)
+		# Wait for the results
+		complete = montage.monitor_experiment_completion()
+		
+		if complete:
+			jb, wt, cwt = montage.get_results()
+			return True, jb, wt, cwt
+		else:
+			return False, None, None, None
