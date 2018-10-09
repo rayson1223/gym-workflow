@@ -4,6 +4,7 @@ import sys
 from collections import defaultdict
 from collections import namedtuple
 from agents.policy.montage_workflow_policy_factory import MontageWorkflowPolicyFactory
+from gym_workflow.lib.recording import *
 
 
 class TD:
@@ -68,10 +69,10 @@ class TD:
 				Q[state][action] += alpha * td_delta
 
 				if done:
+					write_training_status([i_episode, Q, stats, action, action_probs, reward])
 					break
 
 				state = next_state
-
 		return Q, stats
 
 	@staticmethod
