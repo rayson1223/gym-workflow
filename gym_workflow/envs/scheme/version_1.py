@@ -1,6 +1,7 @@
 from gym_workflow.envs.montage_wf_env import MontageWfEnv
 from gym_workflow.envs.database import DatabaseEnv
 from gym.spaces import Discrete, Tuple
+import random
 
 
 class Version1(MontageWfEnv):
@@ -13,14 +14,14 @@ class Version1(MontageWfEnv):
 		self.is_clusters_size = True
 		self.is_clusters_num = False
 		self.band_num = band_num
-
+		
 		# Setting database connection
 		self.db = DatabaseEnv(db_dir)
-
+		
 		self.action_space = Discrete(5)
-
-		self.observation_space = Discrete(8), Discrete(8), Discrete(3)
-
+		
+		self.observation_space = Discrete(10), Discrete(10), Discrete(3)
+		
 		# Episode Conf
 		# Best exec_time: None or 1, depends on reward version
 		self.best_exec_time = None
@@ -32,11 +33,11 @@ class Version1(MontageWfEnv):
 		self.is_improve = 0
 		self.seed()
 		self.reset()
-
+		
 		# @version 4.0 Config
 		self.worst_exec_time = None
 		self.exec_time_records = None
-
+	
 	"""
 		@version 1: Failed
 		Reward Mechanism Manual:
@@ -45,15 +46,16 @@ class Version1(MontageWfEnv):
 			3) If it's doesn't improve, no reward is given
 			4) If it's perform worst than last exec, negative reward will be given
 	"""
-
+	
 	def step(self, action):
 		assert self.action_space.contains(action)
-
+		
 		def calc_lb_hb(v, p):
 			return (v * (100 - p)) / 100, (v * (p + 100)) / 100
-
+		
 		reward = 0.0
 		self.last_action = action
+		done = False
 		if action == 1:
 			self.clusters_size += 1
 		elif action == 2:
@@ -62,7 +64,7 @@ class Version1(MontageWfEnv):
 			self.clusters_num += 1
 		elif action == 4:
 			self.clusters_num -= 1
-
+		
 		# Range Guarding Function
 		if self.clusters_size <= 0:
 			reward -= 1.0
@@ -79,12 +81,12 @@ class Version1(MontageWfEnv):
 		else:
 			res = self.run_static_experiment(self.clusters_size, self.clusters_num)
 			self.exec_time = res
-
+			
 			if self.best_exec_time is None:
 				self.best_exec_time = res
 			if self.last_exec_time is None:
 				self.last_exec_time = res
-
+			
 			# R1
 			if self.exec_time < self.best_exec_time:
 				reward = 2.0
@@ -103,48 +105,11 @@ class Version1(MontageWfEnv):
 				elif res > self.last_exec_time:
 					reward = -2.0
 					self.is_improve = 2
-
-			"""
-				@version 2: Greedy Approach --> Proved method correct, reward wrong 
-				- Known fact that best exec time is 100
-				All actions will be given -1, goal to find the lowest 2nd score 
-			"""
-			"""
-				if self.exec_time < 200:
-					reward = 10
-				elif self.exec_time > self.best_exec_time:
-					reward = -1
-			"""
-
-			"""
-				@version 3.0: 
-					Adopt reward mechanism with activation functions,
-					if the best exec time doesn't exec the trigger, it will not getting any reward
-
-				Conclusion: 
-					- Success provided the range of the results are similar and distinct as set in static exec time
-					- Failed if is random gen range of exec time   
-			"""
-			"""
-				def sigmoid(x):
-					return 1 / (1 + np.exp(-x))
-
-				if self.best_exec_time is None:
-					self.best_exec_time = self.exec_time
-				elif sigmoid((self.best_exec_time - self.exec_time) / self.best_exec_time) > 0.6 or self.best_exec_time == self.exec_time:
-					self.best_exec_time = self.exec_time
-					reward = 10
-				else:
-					reward = -1
-			"""
-
-			"""
-				@version 4.0:
-					- Using Percentage as the value to gain reward.
-					- 10% of the run will be the sample of experiment scales 
-			"""
-		return self._get_obs(), reward, True, {}
-
+			self.total_reward += reward
+			if self.total_reward > 50:
+				done = True
+		return self._get_obs(), reward, done, {}
+	
 	def render(self, mode='human'):
 		outfile = StringIO() if mode == 'ansi' else sys.stdout
 		init_msg = "Current Experiment Parameters: degree: %d\t cluster.size: %d\t cluster.num: %d\t\n" % (
@@ -159,9 +124,9 @@ class Version1(MontageWfEnv):
 		outfile.write(result_str + (" %s " % self.exec_time) + "\n")
 		outfile.write(expect_str + (" %s " % self.best_exec_time) + "\n")
 		outfile.write(action_str + (" %s " % self.last_action) + "\n")
-
+		
 		return outfile
-
+	
 	def reset(self):
 		# Reset method should always return a new sets of episode settings
 		# self.degree = 0.1
@@ -173,6 +138,11 @@ class Version1(MontageWfEnv):
 			self.last_exec_time = self.exec_time
 		self.wall_time = None
 		self.cum_wall_time = None
-
+		self.total_reward = 0
+		self.clusters_size = random.randint(1, 10)
+		self.clusters_num = random.randint(1, 10)
 		# print("Environment had been reset!")
-		return self._get_obs()
+		return self.clusters_size, self.clusters_num
+	
+	def _get_obs(self):
+		return self.clusters_size, self.clusters_num

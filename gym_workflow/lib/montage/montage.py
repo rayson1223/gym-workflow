@@ -487,15 +487,20 @@ class Montage:
 		while True:
 			out = self.pegasus_status()
 			target_index = 0
+			# Find the done statistic line
 			for index, line in enumerate(out.splitlines()):
 				if "%DONE" in line:
 					target_index = index + 1
 			final_line = out.splitlines()[target_index].split()
-			if float(final_line[7]) == 100.0 or final_line[8].lower() == 'success':
-				complete = True
-				break
-			elif final_line[8].lower() == 'failure':
-				break
+			try:
+				if float(final_line[7]) == 100.0 or final_line[8].lower() == 'success':
+					complete = True
+					break
+				elif final_line[8].lower() == 'failure':
+					break
+			except IndexError:
+				time.sleep(300)
+				pass
 			else:
 				# print("Status: %s, %s" % (final_line[7], final_line[8]))
 				time.sleep(300)

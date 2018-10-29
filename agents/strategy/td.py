@@ -67,8 +67,8 @@ class TD:
 				td_target = reward + discount_factor * Q[next_state][best_next_action]
 				td_delta = td_target - Q[state][action]
 				Q[state][action] += alpha * td_delta
-
-				if done:
+				# print("Count %s: %s, State: %s,  Reward: %s" % (t, done, next_state, reward))
+				if done or t > 100:
 					write_training_status([i_episode, Q, stats, action, action_probs, reward])
 					break
 

@@ -2,7 +2,7 @@ from gym_workflow.envs.montage_wf_env import MontageWfEnv
 from gym_workflow.envs.database import DatabaseEnv
 from gym.spaces import Discrete, Tuple
 import numpy as np
-
+import random
 
 class Version3(MontageWfEnv):
 	"""
@@ -52,6 +52,7 @@ class Version3(MontageWfEnv):
 
 		reward = 0.0
 		self.last_action = action
+		done = False
 		if action == 1:
 			self.clusters_size += 1
 		elif action == 2:
@@ -91,8 +92,9 @@ class Version3(MontageWfEnv):
 				reward = 10
 			else:
 				reward = -1
-
-		return self._get_obs(), reward, True, {}
+		if self.total_reward > 50:
+			done = True
+		return self._get_obs(), reward, done, {}
 
 	def render(self, mode='human'):
 		outfile = StringIO() if mode == 'ansi' else sys.stdout
@@ -122,6 +124,12 @@ class Version3(MontageWfEnv):
 			self.last_exec_time = self.exec_time
 		self.wall_time = None
 		self.cum_wall_time = None
-
+		self.total_reward = 0
+		self.clusters_size = random.randint(1, 10)
+		self.clusters_num = random.randint(1, 10)
+		
 		# print("Environment had been reset!")
-		return self._get_obs()
+		return self.clusters_size, self.clusters_num
+	
+	def _get_obs(self):
+		return self.clusters_size, self.clusters_num

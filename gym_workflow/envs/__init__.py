@@ -20,3 +20,7 @@ register(
 	id='Montage-v5',
 	entry_point="gym_workflow.envs.scheme.version_5:Version5",
 )
+register(
+	id='Montage-v6',
+	entry_point="gym_workflow.envs.scheme.version_6:Version6",
+)
