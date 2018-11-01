@@ -82,7 +82,11 @@ class Version5(MontageWfEnv):
 			if not status:
 				return self._get_obs(), -10, True, {}
 			
-			self.exec_time = wt
+			jb = 0 if jb is None else jb
+			wt = 0 if wt is None else wt
+			cwt = 0 if cwt is None else cwt
+			
+			self.exec_time = jb
 			
 			if self.best_exec_time is None:
 				self.best_exec_time = self.exec_time
