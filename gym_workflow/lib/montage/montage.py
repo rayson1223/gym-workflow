@@ -835,9 +835,132 @@ class Montage:
 					29: lambda: random.randrange(342, 351, 1),
 					30: lambda: random.randrange(339, 349, 1),
 				},
+			},
+			0.5: {
+				
+				1: {
+					1: lambda: random.randrange(6653, 8417, 1),
+					2: lambda: random.randrange(6606, 9032, 1),
+					3: lambda: random.randrange(4921, 9097, 1),
+					4: lambda: random.randrange(6356, 9517, 1),
+					5: lambda: random.randrange(6998, 8498, 1),
+					6: lambda: random.randrange(7126, 8970, 1),
+					7: lambda: random.randrange(7278, 9181, 1),
+					8: lambda: random.randrange(7451, 9336, 1),
+					9: lambda: random.randrange(7456, 9477, 1),
+					10: lambda: random.randrange(7938, 9564, 1),
+				},
+				2: {
+					1: lambda: random.randrange(4406, 5608, 1),
+					2: lambda: random.randrange(4257, 5476, 1),
+					3: lambda: random.randrange(4623, 6317, 1),
+					4: lambda: random.randrange(4269, 5106, 1),
+					5: lambda: random.randrange(4350, 5344, 1),
+					6: lambda: random.randrange(3252, 5471, 1),
+					7: lambda: random.randrange(3858, 5672, 1),
+					8: lambda: random.randrange(4417, 5869, 1),
+					9: lambda: random.randrange(4555, 5803, 1),
+					10: lambda: random.randrange(3236, 5517, 1),
+				},
+				3: {
+					1: lambda: random.randrange(2745, 4216, 1),
+					2: lambda: random.randrange(3481, 4579, 1),
+					3: lambda: random.randrange(3314, 4313, 1),
+					4: lambda: random.randrange(3058, 4290, 1),
+					5: lambda: random.randrange(2877, 4122, 1),
+					6: lambda: random.randrange(3617, 4501, 1),
+					7: lambda: random.randrange(3686, 5289, 1),
+					8: lambda: random.randrange(3595, 4620, 1),
+					9: lambda: random.randrange(2665, 4710, 1),
+					10: lambda: random.randrange(3528, 4606, 1),
+				},
+				4: {
+					1: lambda: random.randrange(2902, 3565, 1),
+					2: lambda: random.randrange(2832, 3499, 1),
+					3: lambda: random.randrange(2691, 3607, 1),
+					4: lambda: random.randrange(2844, 3643, 1),
+					5: lambda: random.randrange(3093, 3520, 1),
+					6: lambda: random.randrange(2747, 3406, 1),
+					7: lambda: random.randrange(2892, 3669, 1),
+					8: lambda: random.randrange(2905, 3470, 1),
+					9: lambda: random.randrange(2865, 3662, 1),
+					10: lambda: random.randrange(2958, 3603, 1),
+				},
+				5: {
+					1: lambda: random.randrange(2644, 3110, 1),
+					2: lambda: random.randrange(2700, 3239, 1),
+					3: lambda: random.randrange(2651, 3264, 1),
+					4: lambda: random.randrange(2719, 3400, 1),
+					5: lambda: random.randrange(2664, 3122, 1),
+					6: lambda: random.randrange(2299, 2699, 1),
+					7: lambda: random.randrange(2345, 3442, 1),
+					8: lambda: random.randrange(2629, 3072, 1),
+					9: lambda: random.randrange(2755, 3166, 1),
+					10: lambda: random.randrange(2125, 3069, 1),
+				},
+				6: {
+					1: lambda: random.randrange(2125, 2945, 1),
+					2: lambda: random.randrange(2478, 2987, 1),
+					3: lambda: random.randrange(2479, 2815, 1),
+					4: lambda: random.randrange(2468, 2850, 1),
+					5: lambda: random.randrange(2349, 2834, 1),
+					6: lambda: random.randrange(2331, 2952, 1),
+					7: lambda: random.randrange(2251, 2846, 1),
+					8: lambda: random.randrange(2463, 6740, 1),
+					9: lambda: random.randrange(2536, 2920, 1),
+					10: lambda: random.randrange(2412, 3104, 1),
+				},
+				7: {
+					1: lambda: random.randrange(2195, 2587, 1),
+					2: lambda: random.randrange(2284, 2580, 1),
+					3: lambda: random.randrange(2270, 2502, 1),
+					4: lambda: random.randrange(2259, 2617, 1),
+					5: lambda: random.randrange(2119, 2703, 1),
+					6: lambda: random.randrange(2276, 2638, 1),
+					7: lambda: random.randrange(2321, 2688, 1),
+					8: lambda: random.randrange(2285, 2610, 1),
+					9: lambda: random.randrange(2139, 2574, 1),
+					10: lambda: random.randrange(2283, 2593, 1),
+				},
+				8: {
+					1: lambda: random.randrange(2194, 2457, 1),
+					2: lambda: random.randrange(2191, 2487, 1),
+					3: lambda: random.randrange(2000, 2530, 1),
+					4: lambda: random.randrange(2024, 2407, 1),
+					5: lambda: random.randrange(1986, 2393, 1),
+					6: lambda: random.randrange(2221, 2382, 1),
+					7: lambda: random.randrange(2150, 2442, 1),
+					8: lambda: random.randrange(2186, 2354, 1),
+					9: lambda: random.randrange(2186, 2402, 1),
+					10: lambda: random.randrange(2079, 2395, 1),
+				},
+				9: {
+					1: lambda: random.randrange(2084, 2276, 1),
+					2: lambda: random.randrange(1875, 2215, 1),
+					3: lambda: random.randrange(1998, 2191, 1),
+					4: lambda: random.randrange(2081, 2247, 1),
+					5: lambda: random.randrange(2099, 2287, 1),
+					6: lambda: random.randrange(2097, 2317, 1),
+					7: lambda: random.randrange(2000, 2238, 1),
+					8: lambda: random.randrange(2025, 2288, 1),
+					9: lambda: random.randrange(2113, 3034, 1),
+					10: lambda: random.randrange(2079, 2331, 1),
+				},
+				10: {
+					1: lambda: random.randrange(1960, 2137, 1),
+					2: lambda: random.randrange(2013, 2129, 1),
+					3: lambda: random.randrange(2006, 2151, 1),
+					4: lambda: random.randrange(1986, 2194, 1),
+					5: lambda: random.randrange(1842, 2196, 1),
+					6: lambda: random.randrange(2015, 2151, 1),
+					7: lambda: random.randrange(1895, 2182, 1),
+					8: lambda: random.randrange(2029, 2164, 1),
+					9: lambda: random.randrange(1926, 2178, 1),
+					10: lambda: random.randrange(2058, 2188, 1),
+				},
 			}
 		}
-		return cs_degree[0.1][cs][cn]()
+		return cs_degree[0.5][cs][cn]()
 	
 	@staticmethod
 	def gen_static_exec_time(cs, cn):
@@ -971,9 +1094,9 @@ class Montage:
 		}
 		return cs_degree[0.1][cs][cn]
 	
-	def write_record(self, cs, cn):
-		if not os.path.exists(os.getcwd() + "/workflow_record.csv"):
-			with open(os.getcwd() + "/workflow_record.csv", 'w', newline='', encoding='utf-8') as r:
+	def write_record(self, cs, cn, filename="workflow_record.csv"):
+		if not os.path.exists(os.getcwd() + "/{}".format(filename)):
+			with open(os.getcwd() + "/{}".format(filename), 'w', newline='', encoding='utf-8') as r:
 				# fieldnames = [
 				# 	'center', 'degree', 'band', 'folder_name', 'cluster_size', 'cluster_num', 'exec_time', 'wall_time',
 				# 	'cum_wall_time'
@@ -984,7 +1107,7 @@ class Montage:
 				writer = csv.DictWriter(r, fieldnames=fieldnames)
 				writer.writeheader()
 		
-		with open('workflow_record.csv', 'a') as r:
+		with open(filename, 'a') as r:
 			writer = csv.writer(r)
 			writer.writerow([self.work_dir, cs, cn])
 	
