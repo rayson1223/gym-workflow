@@ -6,11 +6,11 @@ from agents.strategy.td import TD
 import agents.utils.plotting as plt
 
 if __name__ == '__main__':
-	env = make('Montage-v5')
+	env = make('Montage-v6')
 	episodes = 1000
 
 	# Q Learning
-	Q, stats = TD.q_learning(env, episodes, discount_factor=0.8)
+	Q, stats = TD.q_learning(env, episodes, discount_factor=0.8, epsilon=0.3)
 	# print(Q)
 	V = defaultdict(float)
 	for state, action_values in Q.items():

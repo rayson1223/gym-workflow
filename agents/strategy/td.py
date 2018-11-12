@@ -5,6 +5,7 @@ from collections import defaultdict
 from collections import namedtuple
 from agents.policy.montage_workflow_policy_factory import MontageWorkflowPolicyFactory
 from gym_workflow.lib.recording import *
+import agents.utils.plotting as plt
 
 
 class TD:
@@ -44,6 +45,12 @@ class TD:
 			# Print out which episode we're on, useful for debugging.
 			if (i_episode + 1) % 100 == 0:
 				print("\rEpisode {}/{}.".format(i_episode + 1, num_episodes), end="")
+				V = defaultdict(float)
+				for state, action_values in Q.items():
+					action_value = np.max(action_values)
+					V[state] = action_value
+				plt.plot_value_function(V, title="Q-Learning: Value Function representation - %s episodes" % (
+						i_episode + 1))
 				sys.stdout.flush()
 
 			# Reset the environment and pick the first action
@@ -69,7 +76,7 @@ class TD:
 				Q[state][action] += alpha * td_delta
 				# print("Count %s: %s, State: %s,  Reward: %s" % (t, done, next_state, reward))
 				if done or t > 100:
-					write_training_status([i_episode, Q, stats, action, action_probs, reward])
+					# write_training_status([i_episode, Q, stats, action, action_probs, reward])
 					break
 
 				state = next_state

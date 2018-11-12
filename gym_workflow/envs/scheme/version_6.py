@@ -31,7 +31,7 @@ class Version6(MontageWfEnv):
 		# Setting database connection
 		self.db = None
 		self.action_space = Discrete(ACTION_RANGE)
-		self.observation_space = Discrete(CLUSTER_RANGE), Discrete(CLUSTER_RANGE), Discrete(ACTION_RANGE)
+		self.observation_space = Discrete(CLUSTER_RANGE), Discrete(6), Discrete(ACTION_RANGE)
 		
 		# Episode Conf
 		# Best exec_time: None or 1, depends on reward version
@@ -69,24 +69,24 @@ class Version6(MontageWfEnv):
 		
 		# Range Guarding Function
 		if self.clusters_size <= 0:
-			reward = -1.0
+			reward = -20.0
 			self.clusters_size = 1
-			done = True
+		# done = True
 		# write_episode([self._get_obs(), action, None, None, None, None, self.best_exec_time, None, reward])
-		elif self.clusters_size > 10:
-			reward = -1.0
-			self.clusters_size = 10
-			done = True
+		elif self.clusters_size > 6:
+			reward = -20.0
+			self.clusters_size = 6
+		# done = True
 		# write_episode([self._get_obs(), action, None, None, None, None, self.best_exec_time, None, reward])
 		elif self.clusters_num <= 0:
-			reward = -1.0
+			reward = -20.0
 			self.clusters_num = 1
-			done = True
+		# done = True
 		# write_episode([self._get_obs(), action, None, None, None, None, self.best_exec_time, None, reward])
 		elif self.clusters_num > 10:
-			reward = -1.0
+			reward = -20.0
 			self.clusters_num = 10
-			done = True
+		# done = True
 		# write_episode([self._get_obs(), action, None, None, None, None, self.best_exec_time, None, reward])
 		else:
 			# Return all the data collected
@@ -104,22 +104,19 @@ class Version6(MontageWfEnv):
 			if self.last_exec_time is None:
 				self.last_exec_time = self.exec_time
 			
-			def calc_lb_hb(v, p):
-				return (v * (100 - p)) / 100, (v * (p + 100)) / 100
-			
-			lres_lb, lres_hb = calc_lb_hb(self.last_exec_time, 10)
-			if self.exec_time <= lres_lb and self.exec_time <= self.best_exec_time:
-				reward = 20
-			elif lres_lb >= self.exec_time >= self.best_exec_time:
-				reward = 10
-			elif lres_lb <= self.exec_time <= lres_hb:
-				reward = -1
-			else:
+			if self.exec_time < self.best_exec_time:
+				self.best_exec_time = self.exec_time
+				reward = 100
+			elif self.exec_time > self.last_exec_time:
 				reward = -20
-		
+			else:
+				reward = -5
+			self.last_exec_time = self.exec_time
+			
 		# write_episode([self._get_obs(), action, status, jb, wt, cwt, self.best_exec_time, improvement, reward])
 		self.reward += reward
-		if self.reward >= 200:
+		if self.reward >= 400:
+			print("Reward are for the episode are: %s" % self.reward)
 			done = True
 		return self._get_obs(), reward, done, {}
 	
@@ -145,7 +142,11 @@ class Version6(MontageWfEnv):
 	def reset(self):
 		self.terminate_count = 0
 		self.reward = 0
-		self.clusters_size = random.randint(1, 10)
+		self.last_exec_time = None
+		# self.best_exec_time = 0
+		# self.clusters_size = 6
+		# self.clusters_num = 10
+		self.clusters_size = random.randint(1, 6)
 		self.clusters_num = random.randint(1, 10)
 		return self.clusters_size, self.clusters_num
 	
