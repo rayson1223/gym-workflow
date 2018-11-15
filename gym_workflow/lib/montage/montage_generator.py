@@ -1,20 +1,14 @@
-from gym_workflow.lib.montage.montage import Montage
+from gym_workflow.envs.montage_wf_env import MontageWfEnv
 import time
 
 
 def main():
-	for cs in range(10):
-		for cn in range(10):
+	degree = 0
+	for d in range(5):
+		degree += 0.1
+		for cs in range(10):
 			for i in range(10):
-				a = Montage()
-				a.build(cs + 1, cn + 1)
-				a.pegasus_run()
-
-				# Wait for the job submission status
-				time.sleep(5)
-				a.write_record(cs + 1, cn + 1)
-
-	# a.pegasus_remove()
+				MontageWfEnv.run_experiment(cs + 1, degrees=degree, file="workflow_record_1.csv")
 
 
 if __name__ == "__main__":

@@ -96,13 +96,14 @@ class MontageWfEnv(WfEnv):
 		return Montage.gen_exec_time(cs, cn)
 	
 	@staticmethod
-	def run_experiment(cs, cn):
-		montage = Montage()
+	def run_experiment(cs=1, cn=None, degrees=0.1, band=["2mass:j:red"], file="workflow_record.csv"):
+		montage = Montage(degrees=degrees, band=band)
 		montage.build(cs, cn)
 		montage.pegasus_run()
 		# Wait for the job submission status
 		time.sleep(5)
 		# Wait for the results
+		montage.write_record(cs, cn, filename=file)
 		complete = montage.monitor_experiment_completion()
 		
 		if complete:

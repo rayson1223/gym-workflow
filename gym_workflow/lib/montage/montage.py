@@ -60,7 +60,7 @@ class Montage:
 	# self.dax.invoke('on_error', share_dir + "/notification/email")
 	# self.dax.invoke('on_success', share_dir + "/notification/email --report=pegasus-statistics")
 	
-	def build_transformation_catalog(self, clusters_size=1, clusters_num=1):
+	def build_transformation_catalog(self, clusters_size=1, clusters_num=None):
 		"""
 			Some transformations in Montage uses multiple executables
 		"""
@@ -102,7 +102,6 @@ class Montage:
 			
 			# Control what kind of jobs use clustering
 			if fname in ["mProject", "mDiff", "mDiffFit", "mBackground"]:
-				# TODO: Customize the clustering by configuration
 				# Horizontal Clustering
 				# 1) clusters.size factor
 				#
@@ -113,15 +112,17 @@ class Montage:
 				#   The clusters.size factor associated with job B for siteX is say 3. This will result in 2 clustered jobs,
 				#   one composed of 3 jobs and another of 2 jobs.
 				f.write("    profile pegasus \"clusters.size\" \"%s\"\n" % clusters_size)
-			
-			# 2) clusters.num factor
-			#
-			# The clusters.num factor denotes how many clustered jobs does the user want to see per level per site.
-			# It is specified via the use of a PEGASUS namespace profile key 'clusters.num'. for e.g.
-			#
-			#   if at a particular level, say 4 jobs referring to logical transformation B have been scheduled to a siteX.
-			#   The 'clusters.num' factor associated with job B for siteX is say 3.
-			#   This will result in 3 clustered jobs, one composed of 2 jobs and others of a single job each.
+				
+				# 2) clusters.num factor
+				#
+				# The clusters.num factor denotes how many clustered jobs does the user want to see per level per site.
+				# It is specified via the use of a PEGASUS namespace profile key 'clusters.num'. for e.g.
+				#
+				#   if at a particular level, say 4 jobs referring to logical transformation B have been scheduled to a siteX.
+				#   The 'clusters.num' factor associated with job B for siteX is say 3.
+				#   This will result in 3 clustered jobs, one composed of 2 jobs and others of a single job each.
+				if clusters_num is not None:
+					f.write("    profile pegasus \"clusters.num\" \"%s\"\n" % clusters_num)
 			
 			# Runtime clustering
 			# f.write("    profile pegasus \"runtime\" \"100\"\n")
@@ -1102,14 +1103,14 @@ class Montage:
 				# 	'cum_wall_time'
 				# ]
 				fieldnames = [
-					'submit_dir', 'cluster_size', 'cluster_num'
+					'degrees', 'submit_dir', 'cluster_size', 'cluster_num'
 				]
 				writer = csv.DictWriter(r, fieldnames=fieldnames)
 				writer.writeheader()
 		
 		with open(filename, 'a') as r:
 			writer = csv.writer(r)
-			writer.writerow([self.work_dir, cs, cn])
+			writer.writerow([self.degrees, self.work_dir, cs, cn])
 	
 	def build(self, cluster_size=1, cluster_number=1):
 		self.build_transformation_catalog(cluster_size, cluster_number)
