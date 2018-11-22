@@ -45,12 +45,12 @@ class TD:
 			# Print out which episode we're on, useful for debugging.
 			if (i_episode + 1) % 100 == 0:
 				print("\rEpisode {}/{}.".format(i_episode + 1, num_episodes), end="")
-				V = defaultdict(float)
-				for state, action_values in Q.items():
-					action_value = np.max(action_values)
-					V[state] = action_value
-				plt.plot_value_function(V, title="Q-Learning: Value Function representation - %s episodes" % (
-						i_episode + 1))
+				# V = defaultdict(float)
+				# for state, action_values in Q.items():
+				# 	action_value = np.max(action_values)
+				# 	V[state] = action_value
+				# plt.plot_value_function(V, title="Q-Learning: Value Function representation - %s episodes" % (
+				# 		i_episode + 1))
 				sys.stdout.flush()
 
 			# Reset the environment and pick the first action

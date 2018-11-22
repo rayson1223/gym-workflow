@@ -964,6 +964,24 @@ class Montage:
 		return cs_degree[0.5][cs][cn]()
 	
 	@staticmethod
+	def gen_cs_exec_time(cs):
+		cs_degree = {
+			0.5: {
+				1: lambda: random.randrange(6356, 9564, 1),
+				2: lambda: random.randrange(4257, 5869, 1),
+				3: lambda: random.randrange(2975, 4710, 1),
+				4: lambda: random.randrange(2822, 3669, 1),
+				5: lambda: random.randrange(2458, 3264, 1),
+				6: lambda: random.randrange(2125, 3195, 1),
+				7: lambda: random.randrange(2195, 2640, 1),
+				8: lambda: random.randrange(2107, 2457, 1),
+				9: lambda: random.randrange(1998, 2331, 1),
+				10: lambda: random.randrange(1960, 2194, 1)
+			}
+		}
+		return cs_degree[0.5][cs]()
+	
+	@staticmethod
 	def gen_static_exec_time(cs, cn):
 		"""
 			Static Execution time data for examine reinforcement learning method converging

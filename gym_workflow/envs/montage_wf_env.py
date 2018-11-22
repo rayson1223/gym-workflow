@@ -13,9 +13,10 @@ class WfEnv(gym.Env):
 		self.exec_time = None
 		self.wall_time = None
 		self.cum_wall_time = None
-		self._seed()
+		self.np_random = None
+		self.seed()
 	
-	def _seed(self, seed=None):
+	def seed(self, seed=None):
 		self.np_random, seed = seeding.np_random(seed)
 		return [seed]
 	
@@ -92,8 +93,12 @@ class MontageWfEnv(WfEnv):
 		return Montage.gen_static_exec_time(cs, cn)
 	
 	@staticmethod
-	def run_gen_experiment(cs, cn):
+	def run_gen_experiment(cs, cn=1):
 		return Montage.gen_exec_time(cs, cn)
+	
+	@staticmethod
+	def run_cs_gen_experiment(cs):
+		return Montage.gen_cs_exec_time(cs)
 	
 	@staticmethod
 	def run_experiment(cs=1, cn=None, degrees=0.1, band=["2mass:j:red"], file="workflow_record.csv"):
