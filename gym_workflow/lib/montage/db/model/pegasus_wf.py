@@ -1,4 +1,5 @@
 import subprocess
+import os
 from gym_workflow.lib.montage.db.queries import SQLDb
 
 
@@ -9,17 +10,18 @@ class PegasusWf:
 		self.root_wf_uuid = None
 		self.wf_db_url = None
 		self.stampede_db = None
+		self.work_dir = None
 		try:
 			home_dir = subprocess.getoutput("cd ~; pwd")
 			self._session = SQLDb("%s/%s" % (home_dir, self.master_db_url))
 		except Error as e:
 			raise e
-
+		
 		# If the ID is specified, it means that the query is specific to a workflow.
 		# So we will now query the master database to get the connection URL for the workflow.
 		if wf_id:
 			self.initialize(wf_id)
-
+	
 	def initialize(self, wf_id):
 		try:
 			self.wf_id, self.root_wf_uuid, self.wf_db_url = self._session.getone(
@@ -30,8 +32,9 @@ class PegasusWf:
 				self.stampede_db = SQLDb(db_loc)
 		except Exception as e:
 			print("Initializing: " + e.__str__())
-
+	
 	def initialize_by_work_dir(self, work_dir):
+		self.work_dir = work_dir
 		try:
 			self.wf_id, self.root_wf_uuid, self.wf_db_url = self._session.getone(
 				"select wf_id, wf_uuid, db_url from master_workflow where submit_dir='%s'" % work_dir
@@ -41,7 +44,7 @@ class PegasusWf:
 				self.stampede_db = SQLDb(db_loc)
 		except Exception as e:
 			print("Initializing by work dir: " + e.__str__())
-
+	
 	def get_wall_time(self):
 		def get_workflow_wall_time(workflow_states_list):
 			"""
@@ -66,14 +69,14 @@ class PegasusWf:
 				if workflow_start_event_count == workflow_end_event_count:
 					workflow_wall_time = workflow_end_cum - workflow_start_cum
 			return workflow_wall_time
-
+		
 		if self.stampede_db:
 			return get_workflow_wall_time(self.stampede_db.getall(
 				"select * from main.workflowstate where wf_id = 1"
 			))
 		else:
 			return None
-
+	
 	def get_cum_time(self):
 		if self.stampede_db:
 			return self.stampede_db.getone(
@@ -81,7 +84,7 @@ class PegasusWf:
 			)[0]
 		else:
 			return None
-
+	
 	def get_jobs_run_by_time(self):
 		def sum_all_time(jl):
 			total_runtime = 0
@@ -89,7 +92,7 @@ class PegasusWf:
 				date_format, count, rt = t
 				total_runtime += rt
 			return total_runtime
-
+		
 		if self.stampede_db:
 			return sum_all_time(self.stampede_db.getall(
 				"""
@@ -111,7 +114,7 @@ class PegasusWf:
 			))
 		else:
 			return None
-
+	
 	def get_job_distribution_stat(self):
 		""" https://confluence.pegasus.isi.edu/display/pegasus/Additional+queries """
 		return self.stampede_db.getall(
@@ -129,16 +132,38 @@ class PegasusWf:
 				invoc.wf_id IN (1) GROUP BY transformation
 			"""
 		)
-
-
-def main():
-	wf = PegasusWf()
-	wf.initialize_by_work_dir("/Users/rayson/PycharmProjects/gym-workflow/gym_workflow/lib/montage/work/1530199580407")
-	# print(wf.wf_db_url)
-	print(wf.get_wall_time())
-	print(wf.get_cum_time())
-	print(wf.get_jobs_run_by_time())
-
-
-if __name__ == "__main__":
-	main()
+	
+	def verify_work_dir(self):
+		if self.work_dir is None:
+			return False
+		return True
+	
+	def dax_plot(self, output=""):
+		if self.verify_work_dir():
+			# Relay the workflow
+			self.pegasus_monitord()
+			
+			# Make sure output dir exist
+			if not os.path.exists(output):
+				os.makedirs(output)
+			
+			# Output to there
+			cmd = "pegasus-plots -p dax_graph -o {} {}".format(output, self.work_dir)
+			print("Running Pegasus Run Cmd: %s" % cmd)
+			
+			if subprocess.call(cmd, shell=True) != 0:
+				print("Command failed!")
+	
+	def pegasus_monitord(self, args="-r"):
+		if self.verify_work_dir():
+			# grab the dagman output file
+			file_cmd = "ls {}/*.dagman.out".format(self.work_dir)
+			targets_file = subprocess.getoutput(file_cmd)
+			target = targets_file.splitlines()[0]
+			
+			# execute cmd
+			cmd = "pegasus-monitord {} {}".format(args, target)
+			print("Running Pegasus Run Cmd: %s" % cmd)
+			
+			if subprocess.call(cmd, shell=True) != 0:
+				print("Command failed!")
