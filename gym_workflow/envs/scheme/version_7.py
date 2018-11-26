@@ -63,27 +63,33 @@ class Version7(MontageWfEnv):
 		# Range Guarding Function
 		if self.clusters_size <= 0:
 			self.clusters_size = 1
-		# write_episode([self._get_obs(), action, None, None, None, None, self.best_exec_time, None, reward])
+			write_episode(
+				[self._get_obs(), action, None, None, None, None, self.best_exec_time, None, reward],
+				file_name="v7_workflow_record.csv"
+			)
 		elif self.clusters_size > 10:
 			self.clusters_size = 10
-		# write_episode([self._get_obs(), action, None, None, None, None, self.best_exec_time, None, reward])
+			write_episode(
+				[self._get_obs(), action, None, None, None, None, self.best_exec_time, None, reward],
+				file_name="v7_workflow_record.csv"
+			)
 		else:
 			# Return all the data collected
-			# status, jb, wt, cwt = self.run_experiment(self.clusters_size, self.clusters_num)
-			result = self.run_cs_gen_experiment(self.clusters_size)
+			status, jb, wt, cwt = self.run_experiment(self.clusters_size, self.clusters_num)
+			# result = self.run_cs_gen_experiment(self.clusters_size)
 			
 			# Experiment run failed -> High Penalty
-			# if not status:
-			# 	return self._get_obs(), -10, True, {}
+			if not status:
+				return self._get_obs(), -10, True, {}
 			#
-			self.exec_time = result
+			self.exec_time = jb
 			
 			# Fine Tune Records set within the cluster size
 			if self.clusters_size in self.exec_records:
-				if result > self.exec_records[self.clusters_size]['max']:
-					self.exec_records[self.clusters_size]['max'] = result
-				elif result < self.exec_records[self.clusters_size]['min']:
-					self.exec_records[self.clusters_size]['min'] = result
+				if self.exec_time > self.exec_records[self.clusters_size]['max']:
+					self.exec_records[self.clusters_size]['max'] = self.exec_time
+				elif self.exec_time < self.exec_records[self.clusters_size]['min']:
+					self.exec_records[self.clusters_size]['min'] = self.exec_time
 			else:
 				self.exec_records[self.clusters_size] = {
 					'min': 0,
@@ -106,8 +112,11 @@ class Version7(MontageWfEnv):
 			elif self.exec_time > self.last_exec_time:
 				reward = -5
 			self.last_exec_time = self.exec_time
-		
-		# write_episode([self._get_obs(), action, status, jb, wt, cwt, self.best_exec_time, improvement, reward])
+			
+			write_episode(
+				[self._get_obs(), action, status, jb, wt, cwt, self.best_exec_time, None, reward],
+				file_name="v7_workflow_record.csv"
+			)
 		self.total_reward += reward
 		
 		return self._get_obs(), reward, done, {}

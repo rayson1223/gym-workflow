@@ -76,7 +76,10 @@ class TD:
 				Q[state][action] += alpha * td_delta
 				# print("Count %s: %s, State: %s,  Reward: %s" % (t, done, next_state, reward))
 				if done or t > 100:
-					# write_training_status([i_episode, Q, stats, action, action_probs, reward])
+					write_training_status(
+						[i_episode, Q, stats, action, action_probs, reward],
+						file_name="v7_training_records.csv"
+					)
 					break
 
 				state = next_state
