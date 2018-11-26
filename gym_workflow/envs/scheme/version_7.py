@@ -75,7 +75,7 @@ class Version7(MontageWfEnv):
 			)
 		else:
 			# Return all the data collected
-			status, jb, wt, cwt = self.run_experiment(self.clusters_size, self.clusters_num)
+			status, jb, wt, cwt = self.run_experiment(cs=self.clusters_size, degrees=0.5)
 			# result = self.run_cs_gen_experiment(self.clusters_size)
 			
 			# Experiment run failed -> High Penalty
