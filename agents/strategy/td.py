@@ -1,7 +1,7 @@
 import numpy as np
 import itertools
 import sys
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from collections import namedtuple
 from agents.policy.montage_workflow_policy_factory import MontageWorkflowPolicyFactory
 from gym_workflow.lib.recording import *
@@ -45,12 +45,9 @@ class TD:
 			# Print out which episode we're on, useful for debugging.
 			if (i_episode + 1) % 100 == 0:
 				print("\rEpisode {}/{}.".format(i_episode + 1, num_episodes), end="")
-				# V = defaultdict(float)
-				# for state, action_values in Q.items():
-				# 	action_value = np.max(action_values)
-				# 	V[state] = action_value
-				# plt.plot_value_function(V, title="Q-Learning: Value Function representation - %s episodes" % (
-				# 		i_episode + 1))
+				sQ = OrderedDict(sorted(Q.items()))
+				plt.plot_line_value(sQ,
+				                    title="Q-Learning: Value Function representation - %s episodes" % (i_episode + 1))
 				sys.stdout.flush()
 
 			# Reset the environment and pick the first action
@@ -75,7 +72,7 @@ class TD:
 				td_delta = td_target - Q[state][action]
 				Q[state][action] += alpha * td_delta
 				# print("Count %s: %s, State: %s,  Reward: %s" % (t, done, next_state, reward))
-				if done or t > 100:
+				if done or t + 1 > 100:
 					write_training_status(
 						[i_episode, Q, stats, action, action_probs, reward],
 						file_name="v7_training_records.csv"

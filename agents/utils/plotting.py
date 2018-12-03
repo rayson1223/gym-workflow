@@ -53,7 +53,7 @@ def plot_line_value(Q, title="default"):
 	
 	x_range = np.arange(min_x, max_x + 1)
 	y_range = np.arange(min_y, max_y + 1)
-	fig = plt.figure(figsize=(20, 10))
+	fig = plt.figure(figsize=(8, 5))
 	plt.plot(Q.keys(), [v[0] for v in Q.values()], 'b-', label="Add")
 	plt.plot(Q.keys(), [v[1] for v in Q.values()], 'g--', label="Minus")
 	plt.plot(Q.keys(), [v[2] for v in Q.values()], 'r-.', label="Remain")
@@ -63,7 +63,7 @@ def plot_line_value(Q, title="default"):
 	
 	plt.title(title)
 	plt.legend()
-	fig.savefig(title)
+	fig.savefig('plots/{}'.format(title))
 	plt.show()
 	
 

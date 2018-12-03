@@ -457,27 +457,26 @@ class Montage:
 			      os.path.dirname(self.work_dir), self.folder_name, self.data_dir, self.data_dir
 		      )
 		print("Getting Pegasus Plan executing cmd: %s" % cmd)
-		if subprocess.call(cmd, shell=True) != 0:
-			print("Command failed!")
-			sys.exit(1)
+		while subprocess.call(cmd, shell=True) != 0:
+			print("Command failed on Pegasus Plan!")
+			time.sleep(60)
 	
 	def pegasus_run(self):
 		# Executing pegasus-run cmd for executing planned workflow
 		cmd = "pegasus-run %s" % self.work_dir
 		print("Running Pegasus Run Cmd: %s" % cmd)
 		
-		# Temporary disable execution
-		if subprocess.call(cmd, shell=True) != 0:
-			print("Command failed!")
-			sys.exit(1)
+		while subprocess.call(cmd, shell=True) != 0:
+			print("Command failed on Pegasus Run!")
+			time.sleep(60)
 	
 	def pegasus_remove(self):
 		# pegasus-remove the workflow
 		cmd = "pegasus-remove %s" % self.work_dir
 		print("Running Pegasus Remove Cmd: %s" % cmd)
-		if subprocess.call(cmd, shell=True) != 0:
-			print("Command failed!")
-			sys.exit(1)
+		while subprocess.call(cmd, shell=True) != 0:
+			print("Command failed on Pegasus Remove!")
+			time.sleep(60)
 	
 	def pegasus_status(self):
 		cmd = "pegasus-status -l %s" % self.work_dir
@@ -499,12 +498,13 @@ class Montage:
 					break
 				elif final_line[8].lower() == 'failure':
 					break
-			except IndexError:
-				time.sleep(300)
+			except IndexError as e:
+				print(e)
 				pass
-			else:
-				# print("Status: %s, %s" % (final_line[7], final_line[8]))
-				time.sleep(300)
+			except Exception as e:
+				print(e)
+				pass
+			time.sleep(300)
 		return complete
 	
 	def get_results(self):
@@ -966,18 +966,66 @@ class Montage:
 	@staticmethod
 	def gen_cs_exec_time(cs):
 		cs_degree = {
+			0.1: {
+				1: lambda: random.randrange(406.0, 447.0, 1),
+				2: lambda: random.randrange(346.0, 386.0, 1),
+				3: lambda: random.randrange(339.0, 349.0, 1),
+				4: lambda: random.randrange(338.0, 350.0, 1),
+				5: lambda: random.randrange(338.0, 351.0, 1),
+				6: lambda: random.randrange(334.0, 347.0, 1),
+				7: lambda: random.randrange(333.0, 348.0, 1),
+				8: lambda: random.randrange(334.0, 348.0, 1),
+				9: lambda: random.randrange(334.0, 352.0, 1),
+				10: lambda: random.randrange(335.0, 350.0, 1),
+			},
+			0.2: {
+				1: lambda: random.randrange(1798.0, 3391.0, 1),
+				2: lambda: random.randrange(953.0, 1227.0, 1),
+				3: lambda: random.randrange(830.0, 903.0, 1),
+				4: lambda: random.randrange(708.0, 809.0, 1),
+				5: lambda: random.randrange(722.0, 833.0, 1),
+				6: lambda: random.randrange(703.0, 757.0, 1),
+				7: lambda: random.randrange(697.0, 739.0, 1),
+				8: lambda: random.randrange(687.0, 719.0, 1),
+				9: lambda: random.randrange(687.0, 701.0, 1),
+				10: lambda: random.randrange(678.0, 698.0, 1),
+			},
+			0.3: {
+				1: lambda: random.randrange(6932.0, 9198.0, 1),
+				2: lambda: random.randrange(2917.0, 3850.0, 1),
+				3: lambda: random.randrange(2064.0, 2767.0, 1),
+				4: lambda: random.randrange(1754.0, 2392.0, 1),
+				5: lambda: random.randrange(1592.0, 2088.0, 1),
+				6: lambda: random.randrange(1466.0, 1646.0, 1),
+				7: lambda: random.randrange(1349.0, 1522.0, 1),
+				8: lambda: random.randrange(1280.0, 1414.0, 1),
+				9: lambda: random.randrange(1326.0, 1407.0, 1),
+				10: lambda: random.randrange(1291.0, 1354.0, 1),
+			},
+			0.4: {
+				1: lambda: random.randrange(7747.0, 9900.0, 1),
+				2: lambda: random.randrange(3843.0, 4653.0, 1),
+				3: lambda: random.randrange(2800.0, 3267.0, 1),
+				4: lambda: random.randrange(2138.0, 2322.0, 1),
+				5: lambda: random.randrange(1713.0, 2207.0, 1),
+				6: lambda: random.randrange(1552.0, 1828.0, 1),
+				7: lambda: random.randrange(1459.0, 1706.0, 1),
+				8: lambda: random.randrange(1537.0, 1639.0, 1),
+				9: lambda: random.randrange(1463.0, 1558.0, 1),
+				10: lambda: random.randrange(1429.0, 1529.0, 1),
+			},
 			0.5: {
-				1: lambda: random.randrange(6356, 9564, 1),
-				2: lambda: random.randrange(4257, 5869, 1),
-				3: lambda: random.randrange(2975, 4710, 1),
-				4: lambda: random.randrange(2822, 3669, 1),
-				5: lambda: random.randrange(2458, 3264, 1),
-				6: lambda: random.randrange(2125, 3195, 1),
-				7: lambda: random.randrange(2195, 2640, 1),
-				8: lambda: random.randrange(2107, 2457, 1),
-				9: lambda: random.randrange(1998, 2331, 1),
-				10: lambda: random.randrange(1960, 2194, 1)
-			}
+				1: lambda: random.randrange(10405.0, 13462.0, 1),
+				2: lambda: random.randrange(5627.0, 7732.0, 1),
+				3: lambda: random.randrange(3923.0, 5528.0, 1),
+				4: lambda: random.randrange(3258.0, 4016.0, 1),
+				5: lambda: random.randrange(2407.0, 3576.0, 1),
+				6: lambda: random.randrange(2738.0, 3182.0, 1),
+				7: lambda: random.randrange(2272.0, 2817.0, 1),
+				8: lambda: random.randrange(2174.0, 2424.0, 1),
+				9: lambda: random.randrange(2026.0, 2283.0, 1),
+				10: lambda: random.randrange(1939.0, 2178.0, 1),
+			},
 		}
 		return cs_degree[0.5][cs]()
 	

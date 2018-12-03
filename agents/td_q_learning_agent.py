@@ -13,7 +13,6 @@ if __name__ == '__main__':
 	Q, stats = TD.q_learning(env, episodes, discount_factor=0.8, epsilon=0.3)
 	
 	sQ = OrderedDict(sorted(Q.items()))
-	print(sQ)
 	
 	plt.plot_line_value(sQ, title="Q-Learning: Value Function representation - %s episodes" % episodes)
 # V = defaultdict(float)
