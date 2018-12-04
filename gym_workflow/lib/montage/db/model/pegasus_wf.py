@@ -89,9 +89,18 @@ class PegasusWf:
 	
 	def get_cum_time(self):
 		if self.stampede_db:
-			return self.stampede_db.getone(
-				"select sum(remote_duration * multiplier_factor) FROM invocation as invoc, job_instance as ji WHERE invoc.task_submit_seq >= 0 and invoc.job_instance_id = ji.job_instance_id and invoc.wf_id in (1) and invoc.transformation <> 'condor::dagman'"
-			)[0]
+			results = None
+			while True:
+				jl = self.stampede_db.getone(
+					"select sum(remote_duration * multiplier_factor) FROM invocation as invoc, job_instance as ji WHERE invoc.task_submit_seq >= 0 and invoc.job_instance_id = ji.job_instance_id and invoc.wf_id in (1) and invoc.transformation <> 'condor::dagman'"
+				)[0]
+				if jl is None:
+					time.sleep(10)
+					pass
+				else:
+					results = jl
+					break
+			return results
 		else:
 			return None
 	
@@ -104,24 +113,33 @@ class PegasusWf:
 			return total_runtime
 		
 		if self.stampede_db:
-			return sum_all_time(self.stampede_db.getall(
-				"""
-					select (js.timestamp/ 2629743) as date_format,count(ji.job_instance_id) as count,
-					sum(ji.local_duration) as total_runtime 
-					from
-						workflow wi,
-						job j,
-						job_instance  ji,
-						jobstate js
-					where wi.root_wf_id = 1
-						and wi.wf_id=j.wf_id
-						and j.job_id=ji.job_id
-						and js.job_instance_id = ji.job_instance_id
-						and js.state = 'EXECUTE'
-					group by date_format
-					order by date_format
-				"""
-			))
+			results = None
+			while True:
+				jl = self.stampede_db.getall(
+					"""
+						select (js.timestamp/ 2629743) as date_format,count(ji.job_instance_id) as count,
+						sum(ji.local_duration) as total_runtime
+						from
+							workflow wi,
+							job j,
+							job_instance  ji,
+							jobstate js
+						where wi.root_wf_id = 1
+							and wi.wf_id=j.wf_id
+							and j.job_id=ji.job_id
+							and js.job_instance_id = ji.job_instance_id
+							and js.state = 'EXECUTE'
+						group by date_format
+						order by date_format
+					"""
+				)
+				if jl is None:
+					time.sleep(10)
+					pass
+				else:
+					results = sum_all_time(jl)
+					break
+			return results
 		else:
 			return None
 	
