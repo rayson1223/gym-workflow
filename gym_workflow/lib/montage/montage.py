@@ -510,7 +510,10 @@ class Montage:
 	def get_results(self):
 		wf = PegasusWf()
 		wf.initialize_by_work_dir(self.work_dir)
-		return wf.get_jobs_run_by_time(), wf.get_wall_time(), wf.get_cum_time()
+		jbt = wf.get_jobs_run_by_time()
+		wt = wf.get_wall_time()
+		cwt = wf.get_cum_time()
+		return jbt, wt, cwt
 	
 	@staticmethod
 	def gen_exec_time(cs, cn):

@@ -1,5 +1,6 @@
 import subprocess
 import os
+import time
 from gym_workflow.lib.montage.db.queries import SQLDb
 
 
@@ -71,9 +72,18 @@ class PegasusWf:
 			return workflow_wall_time
 		
 		if self.stampede_db:
-			return get_workflow_wall_time(self.stampede_db.getall(
-				"select * from main.workflowstate where wf_id = 1"
-			))
+			results = None
+			while True:
+				jl = self.stampede_db.getall(
+					"select * from main.workflowstate where wf_id = 1"
+				)
+				if jl is None:
+					time.sleep(10)
+					pass
+				else:
+					results = get_workflow_wall_time(jl)
+					break
+			return results
 		else:
 			return None
 	
