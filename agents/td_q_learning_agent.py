@@ -15,11 +15,4 @@ if __name__ == '__main__':
 	sQ = OrderedDict(sorted(Q.items()))
 	
 	plt.plot_line_value(sQ, title="Q-Learning: Value Function representation - %s episodes" % episodes)
-# V = defaultdict(float)
-# for state, action_values in Q.items():
-# 	action_value = np.max(action_values)
-# 	V[state] = action_value
-#
-# plt.plot_value_function(V, title="Q-Learning: Value Function representation - %s episodes" % episodes)
-	# print(Q)
-# plt.plot_episode_stats(stats)
+	plt.plot_episode_stats(stats)

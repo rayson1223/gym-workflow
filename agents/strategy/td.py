@@ -9,7 +9,7 @@ import agents.utils.plotting as plt
 
 
 class TD:
-
+	
 	@staticmethod
 	def q_learning(env, num_episodes, discount_factor=1.0, alpha=0.5, epsilon=0.1):
 		"""
@@ -28,44 +28,52 @@ class TD:
 				Q is the optimal action-value function, a dictionary mapping state -> action values.
 				stats is an EpisodeStats object with two numpy arrays for episode_lengths and episode_rewards.
 		"""
-		EpisodeStats = namedtuple("Stats", ["episode_lengths", "episode_rewards"])
+		EpisodeStats = namedtuple("Stats",
+		                          ["episode_lengths", "episode_rewards", "episode_total_reward", "episode_action"])
 		# The final action-value function.
 		# A nested dictionary that maps state -> (action -> action-value).
 		Q = defaultdict(lambda: np.zeros(env.action_space.n))
-
+		
 		# Keeps track of useful statistics
 		stats = EpisodeStats(
 			episode_lengths=np.zeros(num_episodes),
-			episode_rewards=np.zeros(num_episodes))
-
+			episode_rewards=np.zeros(num_episodes),
+			episode_total_reward=np.zeros(num_episodes),
+			episode_action=np.zeros(num_episodes)
+		)
+		
 		# The policy we're following
 		policy = MontageWorkflowPolicyFactory().make_epsilon_greedy_policy(Q, epsilon, env.action_space.n)
-
+		
 		for i_episode in range(num_episodes):
 			# Print out which episode we're on, useful for debugging.
 			if (i_episode + 1) % 100 == 0:
 				print("\rEpisode {}/{}.".format(i_episode + 1, num_episodes), end="")
 				sQ = OrderedDict(sorted(Q.items()))
-				plt.plot_line_value(sQ,
-				                    title="Q-Learning: Value Function representation - %s episodes" % (i_episode + 1))
+				plt.plot_line_value(
+					sQ,
+					title="Q-Learning: Value Function representation - %s episodes" % (i_episode + 1)
+				)
 				sys.stdout.flush()
-
+			
 			# Reset the environment and pick the first action
 			state = env.reset()
-
+			
 			# One step in the environment
 			# total_reward = 0.0
 			for t in itertools.count():
-
+				
 				# Take a step
 				action_probs = policy(state)
 				action = np.random.choice(np.arange(len(action_probs)), p=action_probs)
 				next_state, reward, done, _ = env.step(action)
-
+				
 				# Update statistics
 				stats.episode_rewards[i_episode] += reward
 				stats.episode_lengths[i_episode] = t
-
+				stats.episode_total_reward[i_episode] = sum(stats.episode_rewards[0:i_episode + 1])
+				stats.episode_action[i_episode] = action
+				
 				# TD Update
 				best_next_action = np.argmax(Q[next_state])
 				td_target = reward + discount_factor * Q[next_state][best_next_action]
@@ -78,10 +86,10 @@ class TD:
 						file_name="v7_training_records.csv"
 					)
 					break
-
+				
 				state = next_state
 		return Q, stats
-
+	
 	@staticmethod
 	def sarsa(env, num_episodes, discount_factor=1.0, alpha=0.5, epsilon=0.1):
 		"""
@@ -99,53 +107,53 @@ class TD:
 				Q is the optimal action-value function, a dictionary mapping state -> action values.
 				stats is an EpisodeStats object with two numpy arrays for episode_lengths and episode_rewards.
 		"""
-
+		
 		# The final action-value function.
 		# A nested dictionary that maps state -> (action -> action-value).
 		Q = defaultdict(lambda: np.zeros(env.action_space.n))
 		EpisodeStats = namedtuple("Stats", ["episode_lengths", "episode_rewards"])
-
+		
 		# Keeps track of useful statistics
 		stats = EpisodeStats(
 			episode_lengths=np.zeros(num_episodes),
 			episode_rewards=np.zeros(num_episodes))
-
+		
 		# The policy we're following
 		policy = MontageWorkflowPolicyFactory().make_epsilon_greedy_policy(Q, epsilon, env.action_space.n)
-
+		
 		for i_episode in range(num_episodes):
 			# Print out which episode we're on, useful for debugging.
 			if (i_episode + 1) % 100 == 0:
 				print("\rEpisode {}/{}.".format(i_episode + 1, num_episodes), end="")
 				sys.stdout.flush()
-
+			
 			# Reset the environment and pick the first action
 			state = env.reset()
 			action_probs = policy(state)
 			action = np.random.choice(np.arange(len(action_probs)), p=action_probs)
-
+			
 			# One step in the environment
 			for t in itertools.count():
 				# Take a step
 				next_state, reward, done, _ = env.step(action)
-
+				
 				# Pick the next action
 				next_action_probs = policy(next_state)
 				next_action = np.random.choice(np.arange(len(next_action_probs)), p=next_action_probs)
-
+				
 				# Update statistics
 				stats.episode_rewards[i_episode] += reward
 				stats.episode_lengths[i_episode] = t
-
+				
 				# TD Update
 				td_target = reward + discount_factor * Q[next_state][next_action]
 				td_delta = td_target - Q[state][action]
 				Q[state][action] += alpha * td_delta
-
+				
 				if done:
 					break
-
+				
 				action = next_action
 				state = next_state
-
+		
 		return Q, stats

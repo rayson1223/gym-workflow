@@ -105,4 +105,17 @@ def plot_episode_stats(stats, smoothing_window=10, noshow=False):
 		fig3.savefig("Q Learning: Episode per time step")
 		fig3.show()
 	
+	fig4 = plt.figure(figsize=(10, 5))
+	rewards_smoothed = pd.Series(stats.episode_total_reward).rolling(smoothing_window,
+	                                                                 min_periods=smoothing_window).mean()
+	plt.plot(rewards_smoothed)
+	plt.xlabel("Episode")
+	plt.ylabel("Episode Total Reward (Smoothed)")
+	plt.title("Episode Total Reward over Time (Smoothed over window size {})".format(smoothing_window))
+	if noshow:
+		plt.close(fig4)
+	else:
+		fig4.savefig("Q Learning: Episode Reward over Time (Smoothed over window size {})".format(smoothing_window))
+		fig4.show()
+	
 	return fig1, fig2, fig3
