@@ -27,16 +27,10 @@ class Montage:
 		self.tc_target = target
 		self.data_dir = os.getcwd() + "/data"
 		self.work_dir = os.getcwd() + "/work"
-		if os.path.exists(self.data_dir):
-			print("data directory already exists")
-		else:
+		if not os.path.exists(self.data_dir):
 			os.mkdir(self.data_dir)
-			print("data directory created")
-		if os.path.exists(self.work_dir):
-			print("work directory already exists")
-		else:
+		if not os.path.exists(self.work_dir):
 			os.mkdir(self.work_dir)
-			print("work directory created")
 		
 		self.folder_name = int(round(time.time() * 1000))  # calendar.timegm(time.gmtime())
 		self.data_dir = "%s/%s" % (self.data_dir, self.folder_name)
@@ -222,10 +216,11 @@ class Montage:
 		cmd = "mArchiveList %s %s \"%s\" %s %s %s/%s-images.tbl" % (
 			survey, band, self.center, degrees_datafind, degrees_datafind, self.data_dir, band_id
 		)
-		# print("Running sub command: " + cmd)
-		if subprocess.call(cmd, shell=True) != 0:
-			print("Command failed!")
-			sys.exit(1)
+		print("Running sub command: " + cmd)
+		while subprocess.call(cmd, shell=True) != 0:
+			print("Command failed: mArchieveList!")
+			time.sleep(10)
+			
 		self.replica_catalog["%s-images.tbl" % (band_id)] = {
 			"url": "file://%s/%s-images.tbl" % (self.data_dir, band_id), "site_label": "local"
 		}
@@ -243,19 +238,19 @@ class Montage:
 		cmd = "cd %s && mDAGTbls %s-images.tbl region-oversized.hdr %s %s %s" % (
 			self.data_dir, band_id, raw_tbl.name, projected_tbl.name, corrected_tbl.name
 		)
-		# print("Running sub command: " + cmd)
-		if subprocess.call(cmd, shell=True) != 0:
-			print("Command failed!")
-			sys.exit(1)
+		print("Running sub command: " + cmd)
+		while subprocess.call(cmd, shell=True) != 0:
+			print("Command failed: mDagTbl!")
+			time.sleep(10)
 		
 		# diff table
 		cmd = "cd %s && mOverlaps %s-raw.tbl %s-diffs.tbl" % (
 			self.data_dir, band_id, band_id
 		)
-		# print("Running sub command: " + cmd)
-		if subprocess.call(cmd, shell=True) != 0:
-			print("Command failed!")
-			sys.exit(1)
+		print("Running sub command: " + cmd)
+		while subprocess.call(cmd, shell=True) != 0:
+			print("Command failed: mOverlaps!")
+			time.sleep(10)
 		
 		# statfile table
 		t = ascii.read("%s/%s-diffs.tbl" % (self.data_dir, band_id))
