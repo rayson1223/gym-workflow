@@ -106,7 +106,7 @@ class MontageWfEnv(WfEnv):
 		montage.build(cs, cn)
 		montage.pegasus_run()
 		# Wait for the job submission status
-		time.sleep(5)
+		time.sleep(60)
 		# Wait for the results
 		montage.write_record(cs, cn, filename=file)
 		complete = montage.monitor_experiment_completion()
