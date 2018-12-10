@@ -74,15 +74,21 @@ class PegasusWf:
 		if self.stampede_db:
 			results = None
 			while True:
-				jl = self.stampede_db.getall(
-					"select * from main.workflowstate where wf_id = 1"
-				)
-				if jl is None:
-					time.sleep(10)
-					pass
-				else:
-					results = get_workflow_wall_time(jl)
-					break
+                try:
+                    jl = self.stampede_db.getall(
+                        "select * from main.workflowstate where wf_id = 1"
+                    )
+                    if jl is None:
+                        time.sleep(10)
+                        pass
+                    else:
+                        results = get_workflow_wall_time(jl)
+                        break
+                except Exception as e:
+                    print("Error Captures")
+                    print(e)
+                    time.sleep(60)
+                    pass
 			return results
 		else:
 			return None
@@ -91,15 +97,21 @@ class PegasusWf:
 		if self.stampede_db:
 			results = None
 			while True:
-				jl = self.stampede_db.getone(
-					"select sum(remote_duration * multiplier_factor) FROM invocation as invoc, job_instance as ji WHERE invoc.task_submit_seq >= 0 and invoc.job_instance_id = ji.job_instance_id and invoc.wf_id in (1) and invoc.transformation <> 'condor::dagman'"
-				)[0]
-				if jl is None:
-					time.sleep(10)
-					pass
-				else:
-					results = jl
-					break
+                try:
+                    jl = self.stampede_db.getone(
+                        "select sum(remote_duration * multiplier_factor) FROM invocation as invoc, job_instance as ji WHERE invoc.task_submit_seq >= 0 and invoc.job_instance_id = ji.job_instance_id and invoc.wf_id in (1) and invoc.transformation <> 'condor::dagman'"
+                    )[0]
+                    if jl is None:
+                        time.sleep(10)
+                        pass
+                    else:
+                        results = jl
+                        break
+                except Exception as e:
+                    print("Error Captures")
+                    print(e)
+                    time.sleep(60)
+                    pass
 			return results
 		else:
 			return None
@@ -115,30 +127,36 @@ class PegasusWf:
 		if self.stampede_db:
 			results = None
 			while True:
-				jl = self.stampede_db.getall(
-					"""
-						select (js.timestamp/ 2629743) as date_format,count(ji.job_instance_id) as count,
-						sum(ji.local_duration) as total_runtime
-						from
-							workflow wi,
-							job j,
-							job_instance  ji,
-							jobstate js
-						where wi.root_wf_id = 1
-							and wi.wf_id=j.wf_id
-							and j.job_id=ji.job_id
-							and js.job_instance_id = ji.job_instance_id
-							and js.state = 'EXECUTE'
-						group by date_format
-						order by date_format
-					"""
-				)
-				if jl is None:
-					time.sleep(10)
-					pass
-				else:
-					results = sum_all_time(jl)
-					break
+                try:
+                    jl = self.stampede_db.getall(
+                        """
+                            select (js.timestamp/ 2629743) as date_format,count(ji.job_instance_id) as count,
+                            sum(ji.local_duration) as total_runtime
+                            from
+                                workflow wi,
+                                job j,
+                                job_instance  ji,
+                                jobstate js
+                            where wi.root_wf_id = 1
+                                and wi.wf_id=j.wf_id
+                                and j.job_id=ji.job_id
+                                and js.job_instance_id = ji.job_instance_id
+                                and js.state = 'EXECUTE'
+                            group by date_format
+                            order by date_format
+                        """
+                    )
+                    if jl is None:
+                        time.sleep(10)
+                        pass
+                    else:
+                        results = sum_all_time(jl)
+                        break
+                except Exception as e:
+                    print("Error Captures")
+                    print(e)
+                    time.sleep(60)
+                    pass
 			return results
 		else:
 			return None
