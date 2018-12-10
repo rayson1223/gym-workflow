@@ -480,14 +480,15 @@ class Montage:
 	def monitor_experiment_completion(self):
 		complete = False
 		while True:
-			out = self.pegasus_status()
-			target_index = 0
-			# Find the done statistic line
-			for index, line in enumerate(out.splitlines()):
-				if "%DONE" in line:
-					target_index = index + 1
-			final_line = out.splitlines()[target_index].split()
 			try:
+				out = self.pegasus_status()
+				target_index = 0
+				# Find the done statistic line
+				for index, line in enumerate(out.splitlines()):
+					if "%DONE" in line:
+						target_index = index + 1
+				final_line = out.splitlines()[target_index].split()
+			
 				if float(final_line[7]) == 100.0 or final_line[8].lower() == 'success':
 					complete = True
 					break
