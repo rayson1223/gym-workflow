@@ -9,6 +9,7 @@ agents/montage-agent-results
 data/
 work/
 records/
+output/
 *.png
 *.csv
 __pycache__
