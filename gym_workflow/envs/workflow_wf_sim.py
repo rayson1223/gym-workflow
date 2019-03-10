@@ -38,7 +38,6 @@ class WorkflowSimEnv(gym.Env):
                     vm_size, clustering_method, cluster_size,
                     os.getcwd() + "/../gym_workflow/libs/workflowsim/dax/Montage_1000.xml"
             )
-        print(cmd)
         output = subprocess.getoutput(cmd).strip().split('\n')
         return output[len(output) - 1].split()
 
