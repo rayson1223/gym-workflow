@@ -2,6 +2,7 @@ import gym
 from gym.utils import seeding
 import time
 import subprocess
+import os
 
 
 class WorkflowSimEnv(gym.Env):
@@ -31,14 +32,23 @@ class WorkflowSimEnv(gym.Env):
 
     @staticmethod
     def run_cs_experiment(vm_size=20, clustering_method="NONE", cluster_size=1):
-        cmd = "java -jar /Users/rayson/Documents/master/gym-workflow/gym_workflow/libs/workflowsim/WorkflowSim-cs.jar {} {} {}". \
-            format(vm_size, clustering_method, cluster_size)
+        cmd = "java -jar {} {} {} {} {}". \
+            format(
+                    os.getcwd() + "/../gym_workflow/libs/workflowsim/Workflowsim-cs.jar",
+                    vm_size, clustering_method, cluster_size,
+                    os.getcwd() + "/../gym_workflow/libs/workflowsim/dax/Montage_1000.xml"
+            )
+        print(cmd)
         output = subprocess.getoutput(cmd).strip().split('\n')
         return output[len(output) - 1].split()
 
     @staticmethod
     def run_cn_experiment(vm_size=20, clustering_method="NONE", cluster_size=1):
-        cmd = "java -jar /Users/rayson/Documents/master/gym-workflow/gym_workflow/libs/workflowsim/WorkflowSim-cn.jar {} {} {}". \
-            format(vm_size, clustering_method, cluster_size)
+        cmd = "java -jar {} {} {} {} {}". \
+            format(
+                    os.getcwd() + "/../gym_workflow/libs/workflowsim/Workflowsim-cn.jar",
+                    vm_size, clustering_method, cluster_size,
+                    os.getcwd() + "/../gym_workflow/libs/workflowsim/dax/Montage_1000.xml"
+             )
         output = subprocess.getoutput(cmd).strip().split('\n')
         return output[len(output) - 1].split()
