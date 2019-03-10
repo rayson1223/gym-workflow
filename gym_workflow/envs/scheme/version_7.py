@@ -2,8 +2,9 @@ from gym_workflow.envs.montage_wf_env import MontageWfEnv
 from gym_workflow.envs.database import DatabaseEnv
 from gym.spaces import Discrete
 import random
+import numpy as np
 import sys
-from gym_workflow.lib.recording import *
+from gym_workflow.libs.recording import *
 
 
 class Version7(MontageWfEnv):
@@ -41,6 +42,7 @@ class Version7(MontageWfEnv):
 		self.total_reward = 0.0
 		
 		self.exec_records = {}
+		self.all_exec_record = list()
 		self.seed()
 		self.reset()
 	
@@ -63,26 +65,28 @@ class Version7(MontageWfEnv):
 		# Range Guarding Function
 		if self.clusters_size <= 0:
 			self.clusters_size = 1
+			reward = -100
 			write_episode(
 				[self._get_obs(), action, None, None, None, None, self.best_exec_time, None, reward],
 				file_name="v7_workflow_record.csv"
 			)
 		elif self.clusters_size > 10:
 			self.clusters_size = 10
+			reward = -100
 			write_episode(
 				[self._get_obs(), action, None, None, None, None, self.best_exec_time, None, reward],
 				file_name="v7_workflow_record.csv"
 			)
 		else:
 			# Return all the data collected
-			status, jb, wt, cwt = self.run_experiment(cs=self.clusters_size, degrees=0.5)
-			# result = self.run_cs_gen_experiment(self.clusters_size)
+			# status, jb, wt, cwt = self.run_experiment(cs=self.clusters_size, degrees=0.5)
+			result = self.run_cs_gen_experiment(self.clusters_size)
 			
 			# Experiment run failed -> High Penalty
-			if not status:
-				return self._get_obs(), -10, True, {}
+			# if not status:
+			# 	return self._get_obs(), -10, True, {}
 			#
-			self.exec_time = jb
+			self.exec_time = result
 			
 			# Fine Tune Records set within the cluster size
 			if self.clusters_size in self.exec_records:
@@ -95,7 +99,7 @@ class Version7(MontageWfEnv):
 					'min': 0,
 					'max': 0
 				}
-			
+			self.all_exec_record.append(self.exec_time)
 			# Setting up best exec time
 			if self.best_exec_time is None:
 				self.best_exec_time = self.exec_time
@@ -103,20 +107,19 @@ class Version7(MontageWfEnv):
 				self.last_exec_time = self.exec_time
 			
 			# Rewarding / Penalty Judgement
-			if self.exec_time < self.best_exec_time:
+			if self.exec_time < np.percentile(self.all_exec_record, 20):
 				self.best_exec_time = self.exec_time
-				reward = 50
-			# elif self.exec_records[self.clusters_size]['min'] <= self.exec_time <= self.exec_records[self.clusters_size]['max']:
-			elif self.best_exec_time < self.exec_time < self.last_exec_time:
-				reward = 5
+				reward = 500
 			elif self.exec_time > self.last_exec_time:
-				reward = -5
+				reward = -100
+			elif self.exec_time <= self.last_exec_time:
+				reward = -10
 			self.last_exec_time = self.exec_time
 			
-			write_episode(
-				[self._get_obs(), action, status, jb, wt, cwt, self.best_exec_time, None, reward],
-				file_name="v7_workflow_record.csv"
-			)
+			# write_episode(
+			# 	[self._get_obs(), action, status, jb, wt, cwt, self.best_exec_time, None, reward],
+			# 	file_name="v7_workflow_record.csv"
+			# )
 		self.total_reward += reward
 		
 		return self._get_obs(), reward, done, {}

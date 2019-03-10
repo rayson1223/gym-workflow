@@ -28,3 +28,11 @@ register(
 	id='Montage-v7',
 	entry_point="gym_workflow.envs.scheme.version_7:Version7",
 )
+register(
+	id='Montage-v8',
+	entry_point="gym_workflow.envs.scheme.version_8:Version8",
+)
+register(
+	id='Montage-v9',
+	entry_point="gym_workflow.envs.scheme.version_9:Version9",
+)

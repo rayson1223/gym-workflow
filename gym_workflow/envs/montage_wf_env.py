@@ -1,6 +1,6 @@
 import gym
 from gym.utils import seeding
-from gym_workflow.lib.montage.montage import Montage
+from gym_workflow.libs.montage.montage import Montage
 import time
 
 
