@@ -14,6 +14,7 @@ def plot_simple_line(records, xlabel="", ylabel="", title=""):
     plt.ylabel(ylabel)
     plt.title(title)
     plt.show()
+    plt.savefig('plots/{}'.format(title))
 
 
 def plot_value_function(V, title="Value Function"):

@@ -63,7 +63,7 @@ class TD:
                 training = True
 
             write_record(
-                [i_episode, stats], header=['episode', 'stats'],
+                [i_episode, stats, exec_records], header=['episode', 'stats', 'records'],
                 filename="episode_stats.csv"
             )
             # One step in the environment
@@ -87,9 +87,8 @@ class TD:
                     td_delta = td_target - Q[state][action]
                     Q[state][action] += alpha * td_delta
                     write_record(
-                        [i_episode, state, action, next_state, Q, action_probs, reward, records],
-                        header=['episode', 'state', 'action', 'next_state', 'Q value', 'action prob', 'reward',
-                                'records'],
+                        [i_episode, state, action, next_state, Q, action_probs, reward],
+                        header=['episode', 'state', 'action', 'next_state', 'Q value', 'action prob', 'reward'],
                         filename=log_file
                     )
                 if done or t + 1 > 100:
