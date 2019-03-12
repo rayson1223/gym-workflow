@@ -82,6 +82,7 @@ class TD:
                 action = np.random.choice(np.arange(len(action_probs)), p=action_probs)
                 next_state, reward, done, records = env.step(action, training=training)
                 exec_records = records
+
                 if not training:
                     # Update statistics
                     stats.episode_rewards[i_episode] += reward
@@ -95,7 +96,7 @@ class TD:
                     td_delta = td_target - Q[state][action]
                     Q[state][action] += alpha * td_delta
                     write_record(
-                        [i_episode, state, action, next_state, json.dumps(Q), json.dumps(action_probs), reward],
+                        [i_episode, state, action, next_state, json.dumps(Q), json.dumps(action_probs.tolist()), reward],
                         header=['episode', 'state', 'action', 'next_state', 'Q value', 'action prob', 'reward'],
                         filename=log_file
                     )
