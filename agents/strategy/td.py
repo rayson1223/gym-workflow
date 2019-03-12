@@ -100,7 +100,7 @@ class TD:
                         filename=log_file
                     )
                 if done or t + 1 > 100:
-                    if reward < -2000:
+                    if reward < -2000 and not training:
                         termination_count += 1
                     else:
                         termination_count = 0
