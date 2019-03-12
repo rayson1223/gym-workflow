@@ -1,4 +1,6 @@
 import numpy as np
+import pandas as pd
+import json
 import itertools
 import sys
 from collections import defaultdict, OrderedDict
@@ -44,6 +46,8 @@ class TD:
             episode_action=np.zeros(num_episodes)
         )
         exec_records = {}
+        # if continuous get -negative termination, let's put an end
+        termination_count = 0
 
         # The policy we're following
         policy = MontageWorkflowPolicyFactory().make_epsilon_greedy_policy(Q, epsilon, env.action_space.n)
@@ -53,7 +57,8 @@ class TD:
             if (i_episode + 1) % 10 == 0:
                 print("\rEpisode {}/{}.".format(i_episode + 1, num_episodes), end="")
                 plt.plot_simple_line(exec_records["overhead"], xlabel="Episode", ylabel="Overhead(s)",
-                                     title="Episode vs Overhead(s)")
+                                     title="Episode vs Overhead(s) - {} Episode".format(i_episode))
+                plt.plot_episode_stats(stats)
                 sys.stdout.flush()
 
             # Reset the environment and pick the first action
@@ -62,9 +67,12 @@ class TD:
             if i_episode < training_episode:
                 training = True
 
+            pd.Series(stats.episode_rewards).to_csv(path="records/episode_reward.csv")
+            pd.Series(stats.episode_lengths).to_csv(path="records/episode_lengths.csv")
+            pd.Series(stats.episode_total_reward).to_csv(path="records/episode_total_reward.csv")
             write_record(
-                [i_episode, stats, exec_records], header=['episode', 'stats', 'records'],
-                filename="episode_stats.csv"
+                [i_episode, json.dumps(exec_records)], header=['episode', 'records'],
+                filename="execution_records.csv"
             )
             # One step in the environment
             # total_reward = 0.0
@@ -87,11 +95,15 @@ class TD:
                     td_delta = td_target - Q[state][action]
                     Q[state][action] += alpha * td_delta
                     write_record(
-                        [i_episode, state, action, next_state, Q, action_probs, reward],
+                        [i_episode, state, action, next_state, json.dumps(Q), json.dumps(action_probs), reward],
                         header=['episode', 'state', 'action', 'next_state', 'Q value', 'action prob', 'reward'],
                         filename=log_file
                     )
                 if done or t + 1 > 100:
+                    if reward < -2000:
+                        termination_count += 1
+                    else:
+                        termination_count = 0
                     break
                 state = next_state
 

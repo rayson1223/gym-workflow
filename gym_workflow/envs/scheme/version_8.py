@@ -57,7 +57,7 @@ class Version8(WorkflowSimEnv):
         self.all_exec_record.append(float(exec))
 
         if not training:
-            # Setting up best exec time
+            # Setting up best exec
             if self.best_overhead is None:
                 self.best_overhead = overhead
             if self.last_overhead is None:
@@ -84,7 +84,7 @@ class Version8(WorkflowSimEnv):
 
     def reset(self):
         self.total_reward = 0.0
-        return random.randint(1, self.cluster_range)  # , self.clusters_num
+        return np.random.randint(1, self.cluster_range)  # , self.clusters_num
 
     def _get_obs(self):
-        return random.randint(1, self.cluster_range)
+        return np.random.randint(1, self.cluster_range)
