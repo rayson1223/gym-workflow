@@ -96,7 +96,7 @@ class TD:
                     td_delta = td_target - Q[state][action]
                     Q[state][action] += alpha * td_delta
                     write_record(
-                        [i_episode, state, action, next_state, json.dumps(Q), json.dumps(action_probs.tolist()), reward],
+                        [i_episode, state, action, next_state, Q, json.dumps(action_probs.tolist()), reward],
                         header=['episode', 'state', 'action', 'next_state', 'Q value', 'action prob', 'reward'],
                         filename=log_file
                     )
