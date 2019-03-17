@@ -77,9 +77,9 @@ class Version8(WorkflowSimEnv):
                 done = True
 
         return self._get_obs(), reward, done, {
-            "exec": self.all_exec_record,
-            "overhead": self.all_overhead_record,
-            "makespan": self.all_makespan_record
+            "exec": exec,
+            "overhead": overhead,
+            "makespan": makespan
         }
 
     def reset(self):

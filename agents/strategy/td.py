@@ -45,69 +45,98 @@ class TD:
             episode_total_reward=np.zeros(num_episodes),
             episode_action=np.zeros(num_episodes)
         )
-        exec_records = {}
+
         # if continuous get -negative termination, let's put an end
         termination_count = 0
 
         # The policy we're following
         policy = MontageWorkflowPolicyFactory().make_epsilon_greedy_policy(Q, epsilon, env.action_space.n)
 
+        if training_episode > 0:
+            for epi in range(training_episode):
+                epi_record = {
+                    "exec": [],
+                    "overhead": [],
+                    "makespan": []
+                }
+                print("Training in progress: {}".format(epi_record))
+                state = env.reset()
+                for t in itertools.count():
+                    action_probs = policy(state)
+                    action = np.random.choice(np.arange(len(action_probs)), p=action_probs)
+                    next_state, reward, done, records = env.step(action, training=True)
+                    epi_record['exec'].append(records['exec'])
+                    epi_record['overhead'].append(records['overhead'])
+                    epi_record['makespan'].append(records['makespan'])
+                    if done or t + 1 > 100:
+                        break
+                write_record(
+                    [epi, json.dumps(epi_record)], header=['episode', 'records'],
+                    filename="training_exec_records.csv"
+                )
+
         for i_episode in range(num_episodes):
             # Print out which episode we're on, useful for debugging.
             if (i_episode + 1) % 10 == 0:
                 print("\rEpisode {}/{}.".format(i_episode + 1, num_episodes), end="")
                 plt.plot_simple_line(exec_records["overhead"], xlabel="Episode", ylabel="Overhead(s)",
-                                     title="Episode vs Overhead(s) - {} Episode".format(i_episode))
+                                     title="Episode vs Overhead(s) - {} Episode".format(i_episode+1))
                 plt.plot_episode_stats(stats)
                 sys.stdout.flush()
 
             # Reset the environment and pick the first action
             state = env.reset()
-            training = False
-            if i_episode < training_episode:
-                training = True
 
             pd.Series(stats.episode_rewards).to_csv(path="records/episode_reward.csv")
             pd.Series(stats.episode_lengths).to_csv(path="records/episode_lengths.csv")
             pd.Series(stats.episode_total_reward).to_csv(path="records/episode_total_reward.csv")
-            write_record(
-                [i_episode, json.dumps(exec_records)], header=['episode', 'records'],
-                filename="execution_records.csv"
-            )
-            # One step in the environment
-            # total_reward = 0.0
+
+            # Reset episode records
+            exec_records = {
+                "exec": [],
+                "overhead": [],
+                "makespan": []
+            }
+
             for t in itertools.count():
                 # Take a step
                 action_probs = policy(state)
                 action = np.random.choice(np.arange(len(action_probs)), p=action_probs)
-                next_state, reward, done, records = env.step(action, training=training)
-                exec_records = records
+                next_state, reward, done, records = env.step(action, training=False)
+                exec_records['exec'].append(records['exec'])
+                exec_records['overhead'].append(records['overhead'])
+                exec_records['makespan'].append(records['makespan'])
 
-                if not training:
-                    # Update statistics
-                    stats.episode_rewards[i_episode] += reward
-                    stats.episode_lengths[i_episode] = t
-                    stats.episode_total_reward[i_episode] = sum(stats.episode_rewards[0:i_episode + 1])
-                    stats.episode_action[i_episode] = action
+                # Update statistics
+                stats.episode_rewards[i_episode] += reward
+                stats.episode_lengths[i_episode] = t
+                stats.episode_total_reward[i_episode] = sum(stats.episode_rewards[0:i_episode + 1])
+                stats.episode_action[i_episode] = action
 
-                    # TD Update
-                    best_next_action = np.argmax(Q[next_state])
-                    td_target = reward + discount_factor * Q[next_state][best_next_action]
-                    td_delta = td_target - Q[state][action]
-                    Q[state][action] += alpha * td_delta
-                    write_record(
-                        [i_episode, state, action, next_state, Q, json.dumps(action_probs.tolist()), reward],
-                        header=['episode', 'state', 'action', 'next_state', 'Q value', 'action prob', 'reward'],
-                        filename=log_file
-                    )
+                # TD Update
+                best_next_action = np.argmax(Q[next_state])
+                td_target = reward + discount_factor * Q[next_state][best_next_action]
+                td_delta = td_target - Q[state][action]
+                Q[state][action] += alpha * td_delta
+                write_record(
+                    [i_episode, state, action, next_state, Q, json.dumps(action_probs.tolist()), reward],
+                    header=['episode', 'state', 'action', 'next_state', 'Q value', 'action prob', 'reward'],
+                    filename=log_file
+                )
                 if done or t + 1 > 100:
-                    if reward < -2000 and not training:
+                    if reward < 0:
                         termination_count += 1
                     else:
                         termination_count = 0
                     break
                 state = next_state
-
+            # Write down the episode records at the end of episode
+            write_record(
+                [i_episode, json.dumps(exec_records)], header=['episode', 'records'],
+                filename="execution_records.csv"
+            )
+            if termination_count >= 10:
+                break
         return Q, stats, records
 
     @staticmethod
