@@ -126,7 +126,7 @@ class TD:
                 state = next_state
 
             # Checking overall termination conditions
-            if stats.episode_rewards[i_episode] < 0:
+            if stats.episode_rewards[i_episode] < -80:
                 termination_count += 1
             else:
                 termination_count = 0
