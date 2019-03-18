@@ -59,7 +59,6 @@ class TD:
                     "overhead": [],
                     "makespan": []
                 }
-                print("Training in progress: {}".format(epi_record))
                 state = env.reset()
                 for t in itertools.count():
                     action_probs = policy(state)
@@ -76,14 +75,6 @@ class TD:
                 )
 
         for i_episode in range(num_episodes):
-            # Print out which episode we're on, useful for debugging.
-            if (i_episode + 1) % 10 == 0:
-                print("\rEpisode {}/{}.".format(i_episode + 1, num_episodes), end="")
-                plt.plot_simple_line(exec_records["overhead"], xlabel="Episode", ylabel="Overhead(s)",
-                                     title="Episode vs Overhead(s) - {} Episode".format(i_episode+1))
-                plt.plot_episode_stats(stats)
-                sys.stdout.flush()
-
             # Reset the environment and pick the first action
             state = env.reset()
 
@@ -91,13 +82,20 @@ class TD:
             pd.Series(stats.episode_lengths).to_csv(path="records/episode_lengths.csv")
             pd.Series(stats.episode_total_reward).to_csv(path="records/episode_total_reward.csv")
 
+            # Print out which episode we're on, useful for debugging.
+            if (i_episode + 1) % 10 == 0:
+                print("\rEpisode {}/{}.".format(i_episode + 1, num_episodes), end="")
+                plt.plot_simple_line(exec_records["overhead"], xlabel="Episode", ylabel="Overhead(s)",
+                                     title="Episode vs Overhead(s) - {} Episode".format(i_episode + 1))
+                plt.plot_episode_stats(stats)
+                sys.stdout.flush()
+
             # Reset episode records
             exec_records = {
                 "exec": [],
                 "overhead": [],
                 "makespan": []
             }
-
             for t in itertools.count():
                 # Take a step
                 action_probs = policy(state)
@@ -124,19 +122,24 @@ class TD:
                     filename=log_file
                 )
                 if done or t + 1 > 100:
-                    if reward < 0:
-                        termination_count += 1
-                    else:
-                        termination_count = 0
                     break
                 state = next_state
+
+            # Checking overall termination conditions
+            if stats.episode_rewards[i_episode] < 0:
+                termination_count += 1
+            else:
+                termination_count = 0
+
+            # If more than 10 episode negative, just terminate
+            if termination_count >= 10:
+                break
             # Write down the episode records at the end of episode
             write_record(
                 [i_episode, json.dumps(exec_records)], header=['episode', 'records'],
                 filename="execution_records.csv"
             )
-            if termination_count >= 10:
-                break
+
         return Q, stats, records
 
     @staticmethod
