@@ -66,9 +66,9 @@ class Version8(WorkflowSimEnv):
             # Rewarding / Penalty Judgement
             if overhead < np.percentile(self.all_overhead_record, 20):
                 self.best_overhead = overhead
-                reward = 0
+                reward = 200
             else:
-                reward = -1
+                reward = -100
             self.last_overhead = overhead
 
             self.total_reward += reward
