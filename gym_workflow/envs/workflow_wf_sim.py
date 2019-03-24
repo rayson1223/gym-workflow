@@ -31,23 +31,12 @@ class WorkflowSimEnv(gym.Env):
         pass
 
     @staticmethod
-    def run_cs_experiment(vm_size=20, clustering_method="NONE", cluster_size=1):
-        cmd = "java -jar {} {} {} {} {}". \
+    def run_experiment(vm_size=20, clustering_choice="NONE", clustering_method="NONE", cluster_size=0):
+        cmd = "java -jar {} {} {} {} {} {}". \
             format(
-                    os.getcwd() + "/../gym_workflow/libs/workflowsim/WorkflowSim-cs.jar",
-                    vm_size, clustering_method, cluster_size,
-                    os.getcwd() + "/../gym_workflow/libs/workflowsim/dax/Montage_1000.xml"
-            )
-        output = subprocess.getoutput(cmd).strip().split('\n')
-        return output[len(output) - 1].split()
-
-    @staticmethod
-    def run_cn_experiment(vm_size=20, clustering_method="NONE", cluster_size=1):
-        cmd = "java -jar {} {} {} {} {}". \
-            format(
-                    os.getcwd() + "/../gym_workflow/libs/workflowsim/WorkflowSim-cn.jar",
-                    vm_size, clustering_method, cluster_size,
-                    os.getcwd() + "/../gym_workflow/libs/workflowsim/dax/Montage_1000.xml"
-             )
+            os.getcwd() + "/../gym_workflow/libs/workflowsim/WorkflowSim-general.jar",
+            vm_size, clustering_choice, clustering_method, cluster_size,
+            os.getcwd() + "/../gym_workflow/libs/workflowsim/dax/Montage_1000.xml"
+        )
         output = subprocess.getoutput(cmd).strip().split('\n')
         return output[len(output) - 1].split()

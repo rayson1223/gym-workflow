@@ -53,7 +53,8 @@ class Version9(WorkflowSimEnv):
             self.cluster_size - 1
 
         # Return all the data collected
-        makespan, queue, exec, postscript, cost, vm = self.run_cs_experiment(vm_size=self.action_range,
+        makespan, queue, exec, postscript, cost, vm = self.run_experiment(vm_size=self.action_range,
+                                                                             clustering_choice="CSIZE",
                                                                              clustering_method="HORIZONTAL",
                                                                              cluster_size=self.cluster_size)
         overhead = float(queue) + float(postscript)
