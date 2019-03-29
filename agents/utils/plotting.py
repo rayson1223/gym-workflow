@@ -8,16 +8,29 @@ import itertools
 from mpl_toolkits.mplot3d import Axes3D
 
 
-def plot_simple_line(records, xlabel="", ylabel="", title=""):
+def plot_simple_line(records, xlabel="", ylabel="", title="", show_plot=True):
     plt.plot(pd.Series(records).rolling(5, min_periods=5).mean())
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.title(title)
-    plt.show()
+    if show_plot:
+        plt.show()
     plt.savefig('plots/{}'.format(title))
 
 
-def plot_value_function(V, title="Value Function"):
+def plot_boxplot(values=[], labels=[], xlabel="", ylabel="", title="", outliers=False, show_plot=True):
+    fig = plt.figure(figsize=(20, 15))
+    ax = fig.add_subplot(111)
+    ax.boxplot(values, labels=labels, showfliers=outliers)
+    ax.set_title(title)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    if show_plot:
+        plt.show()
+    plt.savefig('plots/{}'.format(title))
+
+
+def plot_value_function(V, title="Value Function", show_plot=True):
     """
     Plots the value function as a surface plot.
     """
@@ -49,12 +62,13 @@ def plot_value_function(V, title="Value Function"):
         ax.view_init(ax.elev, -120)
         fig.colorbar(surf)
         fig.savefig(title)
-        plt.show()
+        if show_plot:
+            plt.show()
 
     plot_surface(X, Y, Z, title)
 
 
-def plot_line_value(Q, title="default"):
+def plot_line_value(Q, title="default", show_plot=True):
     min_x = min(k for k in Q.keys())
     max_x = max(k for k in Q.keys())
     min_y = min(min(v) for v in Q.values())
@@ -73,7 +87,8 @@ def plot_line_value(Q, title="default"):
     plt.title(title)
     plt.legend()
     fig.savefig('plots/{}'.format(title))
-    plt.show()
+    if show_plot:
+        plt.show()
 
 
 def plot_episode_stats(stats, smoothing_window=10, noshow=False):
@@ -84,6 +99,7 @@ def plot_episode_stats(stats, smoothing_window=10, noshow=False):
     plt.ylabel("Episode Length")
     plt.title("Episode Length over Time")
     if noshow:
+        fig1.savefig("Q Learning: Episode Length over Time")
         plt.close(fig1)
     else:
         fig1.savefig("Q Learning: Episode Length over Time")
@@ -97,6 +113,7 @@ def plot_episode_stats(stats, smoothing_window=10, noshow=False):
     plt.ylabel("Episode Reward (Smoothed)")
     plt.title("Episode Reward over Time (Smoothed over window size {})".format(smoothing_window))
     if noshow:
+        fig2.savefig("Q Learning: Episode Reward over Time (Smoothed over window size {})".format(smoothing_window))
         plt.close(fig2)
     else:
         fig2.savefig("Q Learning: Episode Reward over Time (Smoothed over window size {})".format(smoothing_window))
@@ -109,6 +126,7 @@ def plot_episode_stats(stats, smoothing_window=10, noshow=False):
     plt.ylabel("Episode")
     plt.title("Episode per time step")
     if noshow:
+        fig3.savefig("Q Learning: Episode per time step")
         plt.close(fig3)
     else:
         fig3.savefig("Q Learning: Episode per time step")
@@ -122,6 +140,7 @@ def plot_episode_stats(stats, smoothing_window=10, noshow=False):
     plt.ylabel("Episode Total Reward (Smoothed)")
     plt.title("Episode Total Reward over Time (Smoothed over window size {})".format(smoothing_window))
     if noshow:
+        fig4.savefig("Q Learning: Episode Reward over Time (Smoothed over window size {})".format(smoothing_window))
         plt.close(fig4)
     else:
         fig4.savefig("Q Learning: Episode Reward over Time (Smoothed over window size {})".format(smoothing_window))

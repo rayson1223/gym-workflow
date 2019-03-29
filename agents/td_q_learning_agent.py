@@ -11,7 +11,8 @@ if __name__ == '__main__':
 
     # Q Learning
     Q, stats, records = TD.q_learning(
-        env, episodes, discount_factor=0.8, epsilon=0.3, training_episode=1, log_file="v8-training-epi-{}-vm-10.csv".format(episodes)
+        env, episodes, discount_factor=0.8, epsilon=0.3,
+        training_episode=1, log_file="v8-training-epi-{}-vm-10.csv".format(episodes),
     )
 
     sQ = OrderedDict(sorted(Q.items()))

@@ -13,7 +13,10 @@ import agents.utils.plotting as plt
 class TD:
 
     @staticmethod
-    def q_learning(env, num_episodes, discount_factor=1.0, alpha=0.5, epsilon=0.1, training_episode=0, log_file="training-records.csv"):
+    def q_learning(
+            env, num_episodes, discount_factor=1.0, alpha=0.5,
+            epsilon=0.1, training_episode=0, log_file="training-records.csv", show_plot=False
+    ):
         """
         Q-Learning algorithm: Off-policy TD control. Finds the optimal greedy policy
         while following an epsilon-greedy policy
@@ -85,9 +88,12 @@ class TD:
             # Print out which episode we're on, useful for debugging.
             if (i_episode + 1) % 10 == 0:
                 print("\rEpisode {}/{}.".format(i_episode + 1, num_episodes), end="")
-                plt.plot_simple_line(exec_records["overhead"], xlabel="Episode", ylabel="Overhead(s)",
-                                     title="Episode vs Overhead(s) - {} Episode".format(i_episode + 1))
-                plt.plot_episode_stats(stats)
+                plt.plot_simple_line(
+                    exec_records["overhead"], xlabel="Episode", ylabel="Overhead(s)",
+                    title="Episode vs Overhead(s) - {} Episode".format(i_episode + 1),
+                    show_plot=show_plot
+                )
+                plt.plot_episode_stats(stats, noshow=True)
                 sys.stdout.flush()
 
             # Reset episode records
@@ -117,8 +123,8 @@ class TD:
                 td_delta = td_target - Q[state][action]
                 Q[state][action] += alpha * td_delta
                 write_record(
-                    [i_episode, state, action, next_state, Q, json.dumps(action_probs.tolist()), reward],
-                    header=['episode', 'state', 'action', 'next_state', 'Q value', 'action prob', 'reward'],
+                    [i_episode, state, action, next_state, json.dumps(action_probs.tolist()), reward],
+                    header=['episode', 'state', 'action', 'next_state', 'action prob', 'reward'],
                     filename=log_file
                 )
                 if done or t + 1 > 100:
@@ -138,6 +144,10 @@ class TD:
             write_record(
                 [i_episode, json.dumps(exec_records)], header=['episode', 'records'],
                 filename="execution_records.csv"
+            )
+            write_record(
+                [i_episode, Q], header=['episode', 'Q Value'],
+                filename="episode_q_value.csv"
             )
 
         return Q, stats, records
