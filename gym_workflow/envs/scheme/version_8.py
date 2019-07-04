@@ -74,7 +74,7 @@ class Version8(WorkflowSimEnv):
 
             self.total_reward += reward
             self.last_action = action
-            if self.total_reward > 2000 or self.total_reward < -2000:
+            if self.total_reward > 1000 or self.total_reward < -1000:
                 done = True
 
         return self._get_obs(), reward, done, {

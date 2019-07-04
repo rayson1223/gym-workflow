@@ -8,6 +8,153 @@ import itertools
 from mpl_toolkits.mplot3d import Axes3D
 
 
+def overhead_visualization(records_list, xlabel="", ylabel="", title="", show_plot=True):
+    plt.clf()
+    plt.plot(records_list)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.title(title)
+    if show_plot:
+        plt.show()
+    # plt.savefig('plots/{}.png'.format(title))
+
+
+def plot_q_learning_value_function(Q, xlabel="", ylabel="", title="Q Value Function", show_plot=True, save_plot=False):
+    """
+    Plots the value function as a surface plot.
+    """
+    min_x = min(k[0] for k in V.keys())
+    max_x = max(k[0] for k in V.keys())
+    min_y = min(k[1] for k in V.keys())
+    max_y = max(k[1] for k in V.keys())
+
+    x_range = np.arange(min_x, max_x + 1)
+    y_range = np.arange(min_y, max_y + 1)
+    X, Y = np.meshgrid(x_range, y_range)
+
+    # Find value for all (x, y) coordinates
+    Z = np.apply_along_axis(lambda _: V[(_[0], _[1])], 2, np.dstack([X, Y]))
+
+    def plot_surface(X, Y, Z, title):
+        def find_min_max_range(values):
+            a = values.reshape(values.size)
+            return min(a), max(a)
+
+        minV, maxV = find_min_max_range(Z)
+        fig = plt.figure(figsize=(5, 3))
+        ax = fig.add_subplot(111, projection='3d')
+        surf = ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=matplotlib.cm.coolwarm, vmin=minV, vmax=maxV)
+        ax.set_xlabel('Cluster Size')
+        ax.set_ylabel('Cluster Number')
+        ax.set_zlabel('Value')
+        ax.set_title(title)
+        ax.view_init(ax.elev, -120)
+        fig.colorbar(surf)
+        fig.savefig(title)
+        if show_plot:
+            plt.show()
+
+    plot_surface(X, Y, Z, title)
+
+
+def v1_plot_action_value(Q, title="default", show_plot=True):
+    # min_y = min(min(v) for v in Q.values())
+    # max_y = max(max(v) for v in Q.values())
+
+    # y_range = np.arange(min_y, max_y + 1)
+    fig = plt.figure(figsize=(15, 5))
+    keys = []
+    maintain_value = []
+    add_cs_value = []
+    add_cn_value = []
+    minus_cs_value = []
+    minus_cn_value = []
+
+    del Q['key']
+    for k, v in Q.items():
+        if not callable(v):
+            keys.append(', '.join(map(str, k)))
+            maintain_value.append(v[0])
+            add_cs_value.append(v[1])
+            minus_cs_value.append(v[2])
+            add_cn_value.append(v[3])
+            minus_cn_value.append(v[4])
+    plt.clf()
+    plt.plot(keys, maintain_value, '-', label="Maintain")
+    plt.plot(keys, add_cs_value, '^--', label="+CS")
+    plt.plot(keys, minus_cs_value, 'v--', label="-CS")
+    plt.plot(keys, add_cn_value, '^:', label="+CN")
+    plt.plot(keys, minus_cn_value, 'v:', label="-CN")
+    plt.xticks(keys, rotation='vertical')
+
+    plt.xlabel('Cluster Size')
+    plt.ylabel('Action Values')
+
+    plt.title(title)
+    plt.legend()
+    fig.savefig('plots/{}'.format(title))
+    if show_plot:
+        plt.show()
+
+
+def v1_plot_episode_stats(stats, smoothing_window=10, noshow=False):
+    # Plot the episode length over time
+    fig1 = plt.figure(figsize=(10, 5))
+    plt.plot(stats.episode_lengths)
+    plt.xlabel("Episode")
+    plt.ylabel("Episode Length")
+    plt.title("Episode Length over Time")
+    if noshow:
+        fig1.savefig("Experiment 1: Episode Length over Time")
+        plt.close(fig1)
+    else:
+        fig1.savefig("Experiment 1: Episode Length over Time")
+        fig1.show()
+
+    # Plot the episode reward over time
+    fig2 = plt.figure(figsize=(10, 5))
+    rewards_smoothed = pd.Series(stats.episode_rewards).rolling(smoothing_window, min_periods=smoothing_window).mean()
+    plt.plot(rewards_smoothed)
+    plt.xlabel("Episode")
+    plt.ylabel("Episode Reward (Smoothed)")
+    plt.title("Experiment 1: Episode Reward over Time (Smoothed over window size {})".format(smoothing_window))
+    if noshow:
+        fig2.savefig("Experiment 1: Episode Reward over Time (Smoothed over window size {})".format(smoothing_window))
+        plt.close(fig2)
+    else:
+        fig2.savefig("Experiment 1: Episode Reward over Time (Smoothed over window size {})".format(smoothing_window))
+        fig2.show()
+
+    # Plot time steps and episode number
+    fig3 = plt.figure(figsize=(10, 5))
+    plt.plot(np.cumsum(stats.episode_lengths), np.arange(len(stats.episode_lengths)))
+    plt.xlabel("Time Steps")
+    plt.ylabel("Episode")
+    plt.title("Experiment 1: Episode per time step")
+    if noshow:
+        fig3.savefig("Experiment 1: Episode per time step")
+        plt.close(fig3)
+    else:
+        fig3.savefig("Experiment 1: Episode per time step")
+        fig3.show()
+
+    fig4 = plt.figure(figsize=(10, 5))
+    rewards_smoothed = pd.Series(stats.episode_total_reward).rolling(smoothing_window,
+                                                                     min_periods=smoothing_window).mean()
+    plt.plot(rewards_smoothed)
+    plt.xlabel("Episode")
+    plt.ylabel("Episode Total Reward (Smoothed)")
+    plt.title("Experiment 1: Episode Total Reward over Time (Smoothed over window size {})".format(smoothing_window))
+    if noshow:
+        fig4.savefig("Experiment 1: Episode Reward over Time (Smoothed over window size {})".format(smoothing_window))
+        plt.close(fig4)
+    else:
+        fig4.savefig("Experiment 1: Episode Reward over Time (Smoothed over window size {})".format(smoothing_window))
+        fig4.show()
+
+    return fig1, fig2, fig3
+
+
 def plot_simple_line(records, xlabel="", ylabel="", title="", show_plot=True):
     plt.plot(pd.Series(records).rolling(5, min_periods=5).mean())
     plt.xlabel(xlabel)

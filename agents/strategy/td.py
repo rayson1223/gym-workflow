@@ -30,7 +30,7 @@ class TD:
                 training_episode: Number of episode to let the environment training
                 log_file: Name of the log file
 
-        Returns:
+        Returns:log_file
                 A tuple (Q, episode_lengths).
                 Q is the optimal action-value function, a dictionary mapping state -> action values.
                 stats is an EpisodeStats object with two numpy arrays for episode_lengths and episode_rewards.
@@ -74,16 +74,22 @@ class TD:
                         break
                 write_record(
                     [epi, json.dumps(epi_record)], header=['episode', 'records'],
-                    filename="training_exec_records.csv"
+                    filename="{}_training_exec_records.csv".format(log_file)
                 )
 
+        # Reset episode records
+        exec_records = {
+            "exec": [],
+            "overhead": [],
+            "makespan": []
+        }
         for i_episode in range(num_episodes):
             # Reset the environment and pick the first action
             state = env.reset()
 
-            pd.Series(stats.episode_rewards).to_csv(path="records/episode_reward.csv")
-            pd.Series(stats.episode_lengths).to_csv(path="records/episode_lengths.csv")
-            pd.Series(stats.episode_total_reward).to_csv(path="records/episode_total_reward.csv")
+            pd.Series(stats.episode_rewards).to_csv(path="records/{}_episode_reward.csv".format(log_file))
+            pd.Series(stats.episode_lengths).to_csv(path="records/{}_episode_lengths.csv".format(log_file))
+            pd.Series(stats.episode_total_reward).to_csv(path="records/{}_episode_total_reward.csv".format(log_file))
 
             # Print out which episode we're on, useful for debugging.
             if (i_episode + 1) % 10 == 0:
@@ -96,12 +102,7 @@ class TD:
                 plt.plot_episode_stats(stats, noshow=True)
                 sys.stdout.flush()
 
-            # Reset episode records
-            exec_records = {
-                "exec": [],
-                "overhead": [],
-                "makespan": []
-            }
+
             for t in itertools.count():
                 # Take a step
                 action_probs = policy(state)
@@ -138,19 +139,19 @@ class TD:
                 termination_count = 0
 
             # If more than 10 episode negative, just terminate
-            if termination_count >= 10:
-                break
+            # if termination_count >= 10:
+            #     break
             # Write down the episode records at the end of episode
             write_record(
                 [i_episode, json.dumps(exec_records)], header=['episode', 'records'],
-                filename="execution_records.csv"
+                filename="{}_execution_records.csv".format(log_file)
             )
             write_record(
                 [i_episode, Q], header=['episode', 'Q Value'],
-                filename="episode_q_value.csv"
+                filename="{}_episode_q_value.csv".format(log_file)
             )
 
-        return Q, stats, records
+        return Q, stats, exec_records
 
     @staticmethod
     def sarsa(env, num_episodes, discount_factor=1.0, alpha=0.5, epsilon=0.1):

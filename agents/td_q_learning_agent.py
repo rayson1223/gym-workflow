@@ -16,7 +16,7 @@ if __name__ == '__main__':
     )
 
     sQ = OrderedDict(sorted(Q.items()))
-    plt.plot_simple_line(records["overhead"], xlabel="Episode", ylabel="Overhead(s)",
-                        title="Episode vs Overhead(s)")
-    plt.plot_line_value(sQ, title="Q-Learning: Value Function representation - %s episodes" % episodes)
+    # plt.plot_simple_line(records["overhead"], xlabel="Episode", ylabel="Overhead(s)",
+    #                     title="Episode vs Overhead(s)")
+    plt.plot_line_value(sQ, title="Experiment 3: Value Function Overview - %s episodes" % episodes)
     plt.plot_episode_stats(stats)

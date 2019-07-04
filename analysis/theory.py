@@ -3,17 +3,21 @@ import subprocess
 import matplotlib.pyplot as plt
 import numpy as np
 import random
+from functools import reduce
+from json
+from gym_workflow.libs.recording import write_record
 
 
 def gen_cn_experiment(vmSize=20, cluster_method="NONE", cluster_size=1):
-    cmd = "java -jar ../gym_workflow/libs/workflowsim/WorkflowSim-cn.jar {} {} {}".format(vmSize, cluster_method,
-                                                                                          cluster_size)
+    cmd = "java -jar ../gym_workflow/libs/workflowsim/WorkflowSim-cn.jar {} {} {} {}".format(
+        vmSize, cluster_method, cluster_size, "../gym_workflow/libs/workflowsim/dax/Montage_1000.xml")
     output = subprocess.getoutput(cmd).strip().split('\n')
     return output[len(output) - 1].split()
 
+
 def gen_cs_experiment(vmSize=20, cluster_method="NONE", cluster_size=1):
-    cmd = "java -jar ../gym_workflow/libs/workflowsim/WorkflowSim-cs.jar {} {} {}".format(vmSize, cluster_method,
-                                                                                          cluster_size)
+    cmd = "java -jar ../gym_workflow/libs/workflowsim/WorkflowSim-cs.jar {} {} {} {}".format(
+        vmSize, cluster_method, cluster_size, "../gym_workflow/libs/workflowsim/dax/Montage_1000.xml")
     output = subprocess.getoutput(cmd).strip().split('\n')
     return output[len(output) - 1].split()
 
@@ -136,15 +140,36 @@ def plot_all_makespan_overhead():
 
 def overhead_analysis(cluster_method="HORIZONTAL", cluster_size=20):
     data = {}
+    # Data Collection
     for cs in range(cluster_size):
         data[cs + 1] = []
+        print("Processing cluster size of: {}".format(cs))
         for j in range(30):
             result = gen_cs_experiment(cluster_method=cluster_method, cluster_size=cs + 1)
             data[cs + 1].append((float(result[1]) + float(result[3])))
 
+    # Process the percentile analysis
+    k, v = zip(*data.items())
+    allV = reduce(lambda x, y: x + y, v)
+    p20 = np.percentile(allV, 20)
+    p30 = np.percentile(allV, 30)
+    p40 = np.percentile(allV, 40)
+    p50 = np.percentile(allV, 50)
+    p20x = [p20] * len(k)
+    p30x = [p30] * len(k)
+    p40x = [p40] * len(k)
+    p50x = [p50] * len(k)
+
+    write_record([allV], header=['overhead', 'p-20', 'p-30', 'p-40', ''])
+
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ax.boxplot(data.values(), labels=data.keys())
+    ax.plot(data.keys(), p20x, label="p-20")
+    ax.plot(data.keys(), p30x, label="p-30")
+    ax.plot(data.keys(), p40x, label="p-40")
+    ax.plot(data.keys(), p50x, label="p-50")
+    ax.legend(loc="upper right")
     ax.set_title("Cluster Size vs Overhead(s)")
     ax.set_xlabel("Cluster Size")
     ax.set_ylabel("Overhead(s)")
