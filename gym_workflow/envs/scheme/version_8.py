@@ -68,8 +68,8 @@ class Version8(WorkflowSimEnv):
             if makespan < np.percentile(self.all_makespan_record, 20):
                 self.best_makespan = makespan
                 reward = 200
-            else:
-                reward = -100
+            # else:
+            #     reward = -100
             self.last_makespan = makespan
 
             self.total_reward += reward
