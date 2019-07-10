@@ -27,8 +27,8 @@ class Version10(MontageWfEnv):
 
         # Episode Conf
         # Best exec_time: None or 1, depends on reward version
-        self.best_overhead = None
-        self.last_overhead = None
+        self.best_makespan = None
+        self.last_makespan = None
         self.last_action = None
         self.reward = 0
         self.total_reward = 0.0
@@ -47,24 +47,34 @@ class Version10(MontageWfEnv):
         reward = 0.0
 
         # Return all the data collected
-        overhead = self.run_gen_experiment(action)
+        # overhead = self.run_gen_experiment(action)
+        status, jb, wt, cwt = self.run_experiment(action)
 
-        self.all_overhead_record.append(overhead)
+        # Experiment run failed -> High Penalty
+        if not status:
+            return self._get_obs(), 0, True, {}
+
+        jb = 0 if jb is None else jb
+        wt = 0 if wt is None else wt
+        cwt = 0 if cwt is None else cwt
+        
+        makespan = jb
+        self.all_makespan_record.append(makespan)
 
         if not training:
             # Setting up best exec
-            if self.best_overhead is None:
-                self.best_overhead = overhead
-            if self.last_overhead is None:
-                self.last_overhead = overhead
+            if self.best_makespan is None:
+                self.best_makespan = makespan
+            if self.last_makespan is None:
+                self.last_makespan = makespan
 
             # Rewarding / Penalty Judgement
-            if overhead < np.percentile(self.all_overhead_record, 20):
-                self.best_overhead = overhead
+            if makespan < np.percentile(self.all_makespan_record, 20):
+                self.best_makespan = makespan
                 reward = 200
             # else:
             #     reward = -100
-            self.last_overhead = overhead
+            self.last_makespan = makespan
 
             self.total_reward += reward
             self.last_action = action
@@ -72,16 +82,16 @@ class Version10(MontageWfEnv):
                 done = True
 
         return self._get_obs(), reward, done, {
-            "exec": overhead,
-            "overhead": overhead,
-            "makespan": overhead
+            "exec": makespan,
+            "overhead": makespan,
+            "makespan": makespan
         }
 
     def reset(self):
         self.total_reward = 0.0
-        for x in self.all_overhead_record:
-            if x > np.percentile(self.all_overhead_record, 20):
-                self.all_overhead_record.remove(x)
+        for x in self.all_makespan_record:
+            if x > np.percentile(self.all_makespan_record, 20):
+                self.all_makespan_record.remove(x)
         return np.random.randint(1, self.cluster_range+1)  # , self.clusters_num
 
     def _get_obs(self):
