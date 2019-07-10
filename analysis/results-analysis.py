@@ -35,12 +35,17 @@ def convertJsonValueCsvToList(filename):
 
 
 def main():
+    # '../agents/records/v10-training-epi-200-vm-10.csv_episode_lengths.csv'
+    # '../agents/records/v10-training-epi-200-vm-10.csv_episode_reward.csv'
+    # '../agents/records/v10-training-epi-200-vm-10.csv_episode_total_reward.csv'
+    # '../agents/records/v10-training-epi-200-vm-10.csv_execution_records.csv'
     # Check input and output path is existence
     if len(sys.argv) < 5:
         raise FileNotFoundError(
             "Insufficient inputs! Please follow the file structure below " +
             "\n (episode_length, reward, total_reward, exec_records)"
         )
+    print(sys.argv)
     if not os.path.exists(sys.argv[1]):
         raise FileNotFoundError("Episode Length File not exist!")
     if not os.path.exists(sys.argv[2]):

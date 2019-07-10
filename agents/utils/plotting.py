@@ -216,17 +216,22 @@ def plot_value_function(V, title="Value Function", show_plot=True):
 
 
 def plot_line_value(Q, title="default", show_plot=True):
-    min_x = min(k for k in Q.keys())
-    max_x = max(k for k in Q.keys())
+    if 'key' in Q.keys():
+        del Q['key']
+    min_x = min(int(k) for k in Q.keys())
+    max_x = max(int(k) for k in Q.keys())
     min_y = min(min(v) for v in Q.values())
     max_y = max(max(v) for v in Q.values())
 
     x_range = np.arange(min_x, max_x + 1)
     y_range = np.arange(min_y, max_y + 1)
     fig = plt.figure(figsize=(8, 5))
-    plt.plot(Q.keys(), [v[0] for v in Q.values()], 'b-', label="Add")
-    plt.plot(Q.keys(), [v[1] for v in Q.values()], 'g--', label="Minus")
-    plt.plot(Q.keys(), [v[2] for v in Q.values()], 'r-.', label="Remain")
+    plt.plot(Q.keys(), [v[0] for v in Q.values()], '-', label="Maintain")
+    plt.plot(Q.keys(), [v[1] for v in Q.values()], '^--', label="+CS")
+    plt.plot(Q.keys(), [v[2] for v in Q.values()], 'v--', label="-CS")
+    # plt.plot(Q.keys(), [v[0] for v in Q.values()], 'b-', label="Remain")
+    # plt.plot(Q.keys(), [v[1] for v in Q.values()], 'g--', label="Minus")
+    # plt.plot(Q.keys(), [v[1] for v in Q.values()], 'r-.', label="Remain")
 
     plt.xlabel('Cluster Size')
     plt.ylabel('Action Values')

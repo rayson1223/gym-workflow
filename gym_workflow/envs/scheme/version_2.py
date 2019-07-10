@@ -82,7 +82,7 @@ class Version2(MontageWfEnv):
 
             if self.exec_time < 200:
                 reward = 10
-            elif self.exec_time > self.best_exec_time:
+            else:
                 reward = -1
             self.total_reward += reward
             if self.total_reward > 50:

@@ -19,16 +19,16 @@ class Version8(WorkflowSimEnv):
         # Montage Experiment Variable
         super(Version8, self).__init__()
 
-        self.action_range = 10
-        self.cluster_range = 10
+        self.action_range = 100
+        self.cluster_range = 100
         self.action_space = Discrete(self.action_range)
         self.observation_space = Discrete(self.cluster_range)
         self.cluster_size = 1
 
         # Episode Conf
         # Best exec_time: None or 1, depends on reward version
-        self.best_overhead = None
-        self.last_overhead = None
+        self.best_makespan = None
+        self.last_makespan = None
         self.last_action = None
         self.reward = 0
         self.total_reward = 0.0
@@ -52,29 +52,29 @@ class Version8(WorkflowSimEnv):
                                                                              clustering_method="HORIZONTAL",
                                                                              cluster_size=action)
         overhead = float(queue) + float(postscript)
-
+        makespan = float(makespan)
         self.all_overhead_record.append(overhead)
         self.all_makespan_record.append(float(makespan))
         self.all_exec_record.append(float(exec))
 
         if not training:
             # Setting up best exec
-            if self.best_overhead is None:
-                self.best_overhead = overhead
-            if self.last_overhead is None:
-                self.last_overhead = overhead
+            if self.best_makespan is None:
+                self.best_makespan = makespan
+            if self.last_makespan is None:
+                self.last_makespan = makespan
 
             # Rewarding / Penalty Judgement
-            if overhead < np.percentile(self.all_overhead_record, 20):
-                self.best_overhead = overhead
+            if makespan < np.percentile(self.all_makespan_record, 20):
+                self.best_makespan = makespan
                 reward = 200
             else:
                 reward = -100
-            self.last_overhead = overhead
+            self.last_makespan = makespan
 
             self.total_reward += reward
             self.last_action = action
-            if self.total_reward > 1000 or self.total_reward < -1000:
+            if self.total_reward > 2000 or self.total_reward < -2000:
                 done = True
 
         return self._get_obs(), reward, done, {
@@ -85,7 +85,10 @@ class Version8(WorkflowSimEnv):
 
     def reset(self):
         self.total_reward = 0.0
-        return np.random.randint(1, self.cluster_range)  # , self.clusters_num
+        for x in self.all_makespan_record:
+            if x > np.percentile(self.all_makespan_record, 20):
+                self.all_makespan_record.remove(x)
+        return np.random.randint(1, (self.cluster_range+1))  # , self.clusters_num
 
     def _get_obs(self):
-        return np.random.randint(1, self.cluster_range)
+        return np.random.randint(1, (self.cluster_range+1))

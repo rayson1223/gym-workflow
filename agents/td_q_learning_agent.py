@@ -11,12 +11,12 @@ if __name__ == '__main__':
 
     # Q Learning
     Q, stats, records = TD.q_learning(
-        env, episodes, discount_factor=0.8, epsilon=0.3,
-        training_episode=1, log_file="v8-training-epi-{}-vm-10.csv".format(episodes),
+        env, episodes, discount_factor=0.7, epsilon=0.3,
+        training_episode=0, log_file="v8-training-epi-{}-vm-100.csv".format(episodes),
     )
 
     sQ = OrderedDict(sorted(Q.items()))
     # plt.plot_simple_line(records["overhead"], xlabel="Episode", ylabel="Overhead(s)",
     #                     title="Episode vs Overhead(s)")
-    plt.plot_line_value(sQ, title="Experiment 3: Value Function Overview - %s episodes" % episodes)
+    # plt.plot_line_value(sQ, title="Experiment 3: Value Function Overview - %s episodes" % episodes)
     plt.plot_episode_stats(stats)

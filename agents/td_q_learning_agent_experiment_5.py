@@ -6,13 +6,13 @@ from agents.strategy.td import TD
 import agents.utils.plotting as plt
 
 if __name__ == '__main__':
-    env = make('Montage-v5')
+    env = make('Montage-v10')
     episodes = 100
 
     # Q Learning
     Q, stats, records = TD.q_learning(
-        env, episodes, discount_factor=0.7, epsilon=0.3,
-        training_episode=1, log_file="v5-training-epi-{}-vm-10.csv".format(episodes),
+        env, episodes, discount_factor=0.8, epsilon=0.3,
+        training_episode=0, log_file="v10-training-epi-{}-vm-10.csv".format(episodes),
     )
 
     sQ = OrderedDict(sorted(Q.items()), key=lambda i:keyorder.index(i[0]))
@@ -22,6 +22,7 @@ if __name__ == '__main__':
         title="Overhead(s) across episodes"
     )
 
-    plt.v1_plot_action_value(sQ, title="Experiment 3: Action Values Overview - %s episodes" % episodes)
-
-    plt.v1_plot_episode_stats(stats)
+    # plt.v1_plot_action_value(sQ, title="Experiment 3: Action Values Overview - %s episodes" % episodes)
+    plt.plot_line_value(sQ, title="Experiment 3: Action Values Overview - %s episodes" % episodes)
+    # plt.v1_plot_episode_stats(stats)
+    plt.plot_episode_stats(stats, smoothing_window=5)
