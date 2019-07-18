@@ -8,15 +8,31 @@ import itertools
 from mpl_toolkits.mplot3d import Axes3D
 
 
-def overhead_visualization(records_list, xlabel="", ylabel="", title="", show_plot=True):
+def overall_records_visualization(records_list, xlabel="", ylabel="", title="", show_plot=True):
     plt.clf()
+    plt.figure(figsize=(50, 5))
     plt.plot(records_list)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.title(title)
+    plt.savefig('./plots/{}.png'.format(title))
     if show_plot:
         plt.show()
-    # plt.savefig('plots/{}.png'.format(title))
+
+
+def episode_records_boxplot_visualization(records_list, xlabel="", ylabel="", title="", show_plot=True, showfliers=False):
+    plt.clf()
+    fig = plt.figure(figsize=(50, 5))
+    ax = fig.add_subplot(111)
+
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.title(title)
+    ax.boxplot(x.values(), showfliers=showfliers)
+
+    plt.savefig("./plots/{}.png".format(title))
+    if show_plot:
+        plt.show()
 
 
 def plot_q_learning_value_function(Q, xlabel="", ylabel="", title="Q Value Function", show_plot=True, save_plot=False):
@@ -153,6 +169,94 @@ def v1_plot_episode_stats(stats, smoothing_window=10, noshow=False):
         fig4.show()
 
     return fig1, fig2, fig3
+
+
+def plot_exp_2_action_value(Q, title="", show_plot=True):
+    if 'key' in Q.keys():
+        del Q['key']
+    min_x = min(k for k in Q.keys())
+    max_x = max(k for k in Q.keys())
+    # tmp = []
+    # for y in V.values():
+    #     tmp += y
+    # min_y = min(tmp)
+    # max_y = max(tmp)
+
+    x_range = np.arange(min_x, max_x + 1)
+    y_range = np.arange(min_x, max_x + 1)
+    X, Y = np.meshgrid(x_range, y_range)
+
+    # Find value for all (x, y) coordinates
+    # Z = np.apply_along_axis(lambda _: V[_[0]][_[1]-1], 2, np.dstack([X, Y]))
+    Z = np.zeros(shape=(max_x, max_x))
+    for x, v in Q.items():
+        for i, y in enumerate(v, start=0):
+            Z[x - 1, i] = y
+
+    def plot_surface(X, Y, Z, title):
+        def find_min_max_range(values):
+            a = values.reshape(values.size)
+            return min(a), max(a)
+
+        minV, maxV = find_min_max_range(Z)
+        fig = plt.figure(figsize=(10, 7))
+        ax = fig.add_subplot(111, projection='3d')
+        surf = ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=matplotlib.cm.coolwarm, vmin=minV, vmax=maxV)
+        ax.set_xlabel('Preference action')
+        ax.set_ylabel('Cluster Size')
+        ax.set_zlabel('Q Value')
+        ax.set_title(title)
+        ax.view_init(ax.elev, -120)
+        fig.colorbar(surf)
+        fig.savefig("./plots/{}.png".format(title))
+        # if show_plot:
+        plt.show()
+
+    plot_surface(X, Y, Z, title)
+
+
+def plot_exp_3_action_value(Q, title="", show_plot=True):
+    min_x = min(k for k in Q.keys())
+    max_x = max(k for k in Q.keys())
+    # tmp = []
+    # for y in V.values():
+    #     tmp += y
+    # min_y = min(tmp)
+    # max_y = max(tmp)
+
+    # Original
+    x_range = np.arange(0, 99 + 1)
+    y_range = np.arange(0, 99 + 1)
+
+    X, Y = np.meshgrid(x_range, y_range)
+
+    # Find value for all (x, y) coordinates
+    # Z = np.apply_along_axis(lambda _: V[_[0]][_[1]-1], 2, np.dstack([X, Y]))
+    Z = np.zeros(shape=(100, 100))
+    for x, v in Q.items():
+        for i, y in enumerate(v, start=0):
+            Z[x - 1, i] = y
+
+    def plot_surface(X, Y, Z, title):
+        def find_min_max_range(values):
+            a = values.reshape(values.size)
+            return min(a), max(a)
+
+        minV, maxV = find_min_max_range(Z)
+        fig = plt.figure(figsize=(10, 7))
+        ax = fig.add_subplot(111, projection='3d')
+        surf = ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=matplotlib.cm.coolwarm, vmin=minV, vmax=maxV)
+        ax.set_xlabel('Preference action')
+        ax.set_ylabel('Cluster Size')
+        ax.set_zlabel('Q Value')
+        ax.set_title(title)
+        ax.view_init(ax.elev, -120)
+        fig.colorbar(surf)
+        fig.savefig("./plots/{}.png".format(title))
+        # if show_plot:
+        plt.show()
+
+    plot_surface(X, Y, Z, title)
 
 
 def plot_simple_line(records, xlabel="", ylabel="", title="", show_plot=True):

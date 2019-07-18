@@ -7,7 +7,7 @@ import agents.utils.plotting as plt
 
 if __name__ == '__main__':
     env = make('Montage-v1')
-    episodes = 500
+    episodes = 2000
 
     # Q Learning
     Q, stats, records = TD.q_learning(

@@ -34,7 +34,7 @@ class WorkflowSimEnv(gym.Env):
     def run_experiment(vm_size=20, clustering_choice="NONE", clustering_method="NONE", cluster_size=0):
         cmd = "java -jar {} {} {} {} {} {}". \
             format(
-            os.getcwd() + "/../gym_workflow/libs/workflowsim/WorkflowSim-general.jar",
+            os.getcwd() + "/../gym_workflow/libs/workflowsim/WorkflowSim-1.0.jar",
             vm_size, clustering_choice, clustering_method, cluster_size,
             os.getcwd() + "/../gym_workflow/libs/workflowsim/dax/Montage_1000.xml"
         )

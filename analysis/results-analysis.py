@@ -39,6 +39,10 @@ def main():
     # '../agents/records/v10-training-epi-200-vm-10.csv_episode_reward.csv'
     # '../agents/records/v10-training-epi-200-vm-10.csv_episode_total_reward.csv'
     # '../agents/records/v10-training-epi-200-vm-10.csv_execution_records.csv'
+    # ./data/exp3/v8-training-epi-300-vm-100.csv_episode_lengths.csv
+    # ./data/exp3/v8-training-epi-300-vm-100.csv_episode_reward.csv
+    # ./data/exp3/v8-training-epi-300-vm-100.csv_episode_total_reward.csv
+    # ./data/exp3/v8-training-epi-300-vm-100.csv_execution_records.csv
     # Check input and output path is existence
     if len(sys.argv) < 5:
         raise FileNotFoundError(
@@ -79,7 +83,7 @@ def main():
         record_json = json.loads(record)
         box_x.append(record_json['overhead'])
     draw.plot_boxplot(box_x, labels=list(range(1, len(box_x)+1)), xlabel="Episode", ylabel="Overhead", )
-    draw.plot_episode_stats(stats)
+    draw.plot_episode_stats(stats, smoothing_window=5)
 
 
 if __name__ == '__main__':

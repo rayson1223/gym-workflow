@@ -60,7 +60,8 @@ class TD:
                 epi_record = {
                     "exec": [],
                     "overhead": [],
-                    "makespan": []
+                    "makespan": [],
+                    "benchmark": []
                 }
                 state = env.reset()
                 for t in itertools.count():
@@ -70,6 +71,7 @@ class TD:
                     epi_record['exec'].append(records['exec'])
                     epi_record['overhead'].append(records['overhead'])
                     epi_record['makespan'].append(records['makespan'])
+                    epi_record['benchmark'].append(records['benchmark'])
                     if done or t + 1 > 100:
                         break
                 write_record(
@@ -77,11 +79,15 @@ class TD:
                     filename="{}_training_exec_records.csv".format(log_file)
                 )
 
-        # Reset episode records
-        exec_records = {
+        all_exec_records = {
             "exec": [],
+            "queueDelay": [],
             "overhead": [],
-            "makespan": []
+            "makespan": [],
+            "postscriptDelay": [],
+            "clusterDelay": [],
+            "WENDelay": [],
+            "benchmark": []
         }
         for i_episode in range(num_episodes):
             # Reset the environment and pick the first action
@@ -94,14 +100,25 @@ class TD:
             # Print out which episode we're on, useful for debugging.
             if (i_episode + 1) % 10 == 0:
                 print("\rEpisode {}/{}.".format(i_episode + 1, num_episodes), end="")
-                plt.plot_simple_line(
-                    exec_records["overhead"], xlabel="Episode", ylabel="Overhead(s)",
-                    title="Episode vs Overhead(s) - {} Episode".format(i_episode + 1),
-                    show_plot=show_plot
-                )
-                plt.plot_episode_stats(stats, noshow=True)
+                # plt.plot_simple_line(
+                #     exec_records["overhead"], xlabel="Episode", ylabel="Overhead(s)",
+                #     title="Episode vs Overhead(s) - {} Episode".format(i_episode + 1),
+                #     show_plot=show_plot
+                # )
+                # plt.plot_episode_stats(stats, noshow=True)
                 sys.stdout.flush()
 
+            # Reset episode records
+            exec_records = {
+                "exec": [],
+                "queueDelay": [],
+                "overhead": [],
+                "makespan": [],
+                "postscriptDelay": [],
+                "clusterDelay": [],
+                "WENDelay": [],
+                "benchmark": []
+            }
 
             for t in itertools.count():
                 # Take a step
@@ -109,8 +126,13 @@ class TD:
                 action = np.random.choice(np.arange(len(action_probs)), p=action_probs)
                 next_state, reward, done, records = env.step(action, training=False)
                 exec_records['exec'].append(records['exec'])
+                exec_records['queueDelay'].append(records['queue']) if 'queue' in records else None
                 exec_records['overhead'].append(records['overhead'])
                 exec_records['makespan'].append(records['makespan'])
+                exec_records['postscriptDelay'].append(records['postscript']) if 'postscript' in records else None
+                exec_records['clusterDelay'].append(records['cluster']) if 'cluster' in records else None
+                exec_records['WENDelay'].append(records['wen']) if 'wen' in records else None
+                exec_records['benchmark'].append(records['benchmark'])
 
                 # Update statistics
                 stats.episode_rewards[i_episode] += reward
@@ -142,16 +164,25 @@ class TD:
             # if termination_count >= 10:
             #     break
             # Write down the episode records at the end of episode
+            all_exec_records["exec"] += exec_records["exec"]
+            all_exec_records["queueDelay"] += exec_records["queueDelay"]
+            all_exec_records["overhead"] += exec_records["overhead"]
+            all_exec_records["makespan"] += exec_records["makespan"]
+            all_exec_records["postscriptDelay"] += exec_records["postscriptDelay"]
+            all_exec_records["clusterDelay"] += exec_records["clusterDelay"]
+            all_exec_records["WENDelay"] += exec_records["WENDelay"]
+            all_exec_records["benchmark"] += exec_records["benchmark"]
+
             write_record(
                 [i_episode, json.dumps(exec_records)], header=['episode', 'records'],
                 filename="{}_execution_records.csv".format(log_file)
             )
             write_record(
-                [i_episode, Q], header=['episode', 'Q Value'],
+                [i_episode, dict(Q)], header=['episode', 'Q Value'],
                 filename="{}_episode_q_value.csv".format(log_file)
             )
 
-        return Q, stats, exec_records
+        return Q, stats, all_exec_records
 
     @staticmethod
     def sarsa(env, num_episodes, discount_factor=1.0, alpha=0.5, epsilon=0.1):

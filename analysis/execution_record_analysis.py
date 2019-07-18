@@ -9,28 +9,59 @@ csv.field_size_limit(sys.maxsize)
 
 def main():
     x = {}
-    with open('../agents/records/v8-training-epi-100-vm-100.csv_execution_records.csv') as f:
+    with open('../agents/records/exp-3-epi-50-train-0-maintain-all_execution_records.csv') as f:
+        # with open('./data/exp3/v8-training-epi-300-vm-100.csv_execution_records.csv') as f:
         reader = csv.DictReader(f)
         for line in reader:
             epi = int(line['episode']) + 1
             if epi not in x:
-                x[epi] = []
-            makespan = json.loads(line['records'])['makespan']
-            for r in makespan:
-                x[epi].append(float(r))
+                x[epi] = {
+                    "exec": [],
+                    "queueDelay": [],
+                    "overhead": [],
+                    "makespan": [],
+                    "postscriptDelay": [],
+                    "clusterDelay": [],
+                    "WENDelay": [],
+                    "benchmark": []
+                }
+            records = json.loads(line['records'])
+            x[epi]["exec"] = records['exec']
+            x[epi]["queueDelay"] = records['queueDelay'] if 'queueDelay' in records else None
+            x[epi]["overhead"] = records['overhead']
+            x[epi]["makespan"] = records['makespan']
+            x[epi]["postscriptDelay"] = records['postscriptDelay'] if 'postscriptDelay' in records else None
+            x[epi]["clusterDelay"] = records['clusterDelay'] if 'clusterDelay' in records else None
+            x[epi]["WENDelay"] = records['WENDelay'] if 'WENDelay' in records else None
+            x[epi]["benchmark"] = records['benchmark']
 
-    # Process ploting
-    # fig1, ax1 = plt.subplots()
-    fig = plt.figure(1, figsize=(40, 15))
-    ax = fig.add_subplot(111)
+            # for r in makespan:
+            #     x[epi].append(float(r))
 
-    plt.xlabel("Episode")
-    plt.ylabel("Makespan(s)")
-    plt.title('Makespan distribution over episode')
+    # Data conversion
+    for epi in x:
+        for t in x[epi].keys():
+            for k, v in enumerate(x[epi][t]):
+                x[epi][t][k] = float(v)
 
-    ax.boxplot(x.values(), showfliers=False)
+    file_name = "exp-3-epi-50-train-0-maintain-all"
+    # Process plotting on each key
+    for t in x[1].keys():
+        temp = []
+        for epi in x.keys():
+            temp.append(x[epi][t])
 
-    plt.show()
+        # Clear cache
+        plt.clf()
+        if len(list(filter(lambda x: len(x) > 0, temp))) > 0:
+            plt.figure(figsize=(40, 15))
+            plt.xlabel("Episode")
+            plt.ylabel("{}(s)".format(t))
+            plt.title("{} over episode".format(t))
+
+            plt.boxplot(temp, showfliers=False)
+            plt.savefig("./plots/{}-{}.png".format(file_name, t))
+            plt.show()
 
 
 if __name__ == '__main__':

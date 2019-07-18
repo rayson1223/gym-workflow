@@ -47,18 +47,18 @@ class Version10(MontageWfEnv):
         reward = 0.0
 
         # Return all the data collected
-        # overhead = self.run_gen_experiment(action)
-        status, jb, wt, cwt = self.run_experiment(action)
+        makespan = self.run_gen_experiment(action)
+        # status, jb, wt, cwt = self.run_experiment(action)
 
         # Experiment run failed -> High Penalty
-        if not status:
-            return self._get_obs(), 0, True, {}
-
-        jb = 0 if jb is None else jb
-        wt = 0 if wt is None else wt
-        cwt = 0 if cwt is None else cwt
-        
-        makespan = jb
+        # if not status:
+        #     return self._get_obs(), 0, True, {}
+        #
+        # jb = 0 if jb is None else jb
+        # wt = 0 if wt is None else wt
+        # cwt = 0 if cwt is None else cwt
+        #
+        # makespan = jb
         self.all_makespan_record.append(makespan)
 
         if not training:
@@ -71,28 +71,44 @@ class Version10(MontageWfEnv):
             # Rewarding / Penalty Judgement
             if makespan < np.percentile(self.all_makespan_record, 20):
                 self.best_makespan = makespan
-                reward = 200
-            # else:
-            #     reward = -100
+                reward = 10
+            # elif makespan < np.percentile(self.all_makespan_record, 40):
+            #     reward = 1
+            else:
+                reward = -5
             self.last_makespan = makespan
 
             self.total_reward += reward
             self.last_action = action
-            if self.total_reward > 1000 or self.total_reward < -2000:
+            if self.total_reward > 100 or self.total_reward < -100:
                 done = True
 
         return self._get_obs(), reward, done, {
             "exec": makespan,
             "overhead": makespan,
-            "makespan": makespan
+            "makespan": makespan,
+            "benchmark": np.percentile(self.all_makespan_record, 20)
         }
 
     def reset(self):
         self.total_reward = 0.0
-        for x in self.all_makespan_record:
-            if x > np.percentile(self.all_makespan_record, 20):
-                self.all_makespan_record.remove(x)
-        return np.random.randint(1, self.cluster_range+1)  # , self.clusters_num
+        # # This part is crucial, as it determine what data going to be stay and what's going to be remove to
+        # # maintain the data stability
+        # self.all_makespan_record.sort()
+        # for x in self.all_makespan_record:
+        #     # if wanna get reward while mantain the data, must determine a suitable range of data
+        #     # if x < np.percentile(self.all_makespan_record, 20) or x > np.percentile(self.all_makespan_record, 80):
+        #     # Unable to obtain proper reward if without remove the extra datas
+        #     if x > np.percentile(self.all_makespan_record, 40):
+        #         self.all_makespan_record.remove(x)
+        # if len(self.all_makespan_record) > 20:
+        #     while len(self.all_makespan_record) > 20:
+        #         # try to remove the median data
+        #         # self.all_makespan_record.remove(self.all_makespan_record[int(len(self.all_makespan_record) / 2) + 1])
+        #         # self.all_makespan_record.remove(self.all_makespan_record[np.random.randint(1, len(self.all_makespan_record))])
+        #         self.all_makespan_record.remove(self.all_makespan_record[0])
+        #         # self.all_makespan_record.remove(self.all_makespan_record[len(self.all_makespan_record)-1])
+        return np.random.randint(1, self.cluster_range + 1)  # , self.clusters_num
 
     def _get_obs(self):
-        return np.random.randint(1, self.cluster_range+1)
+        return np.random.randint(1, self.cluster_range + 1)

@@ -73,16 +73,16 @@ class Version1(MontageWfEnv):
 
         # Range Guarding Function
         if self.clusters_size <= 0:
-            reward -= 1.0
+            reward -= 100.0
             self.clusters_size = 1
         elif self.clusters_size > 10:
-            reward -= 1.0
+            reward -= 100.0
             self.clusters_size = 10
         elif self.clusters_num <= 0:
-            reward -= 1.0
+            reward -= 100.0
             self.clusters_num = 1
         elif self.clusters_num > 10:
-            reward -= 1.0
+            reward -= 100.0
             self.clusters_num = 10
         else:
             res = self.run_static_experiment(self.clusters_size, self.clusters_num)
@@ -100,7 +100,7 @@ class Version1(MontageWfEnv):
 
             # R1
             if self.exec_time < self.best_exec_time:
-                reward = 2.0
+                reward = 20.0
                 self.is_improve = 1
                 self.best_exec_time = res
             elif self.last_exec_time is not None:
@@ -111,13 +111,13 @@ class Version1(MontageWfEnv):
                     reward = 0
                 # R2 & 4
                 elif res < self.last_exec_time:
-                    reward = 1.0
+                    reward = 10.0
                     self.is_improve = 1
                 elif res > self.last_exec_time:
-                    reward = -2.0
+                    reward = -100.0
                     self.is_improve = 2
             self.total_reward += reward
-            if self.total_reward > 50:
+            if self.total_reward > 150:
                 done = True
 
         return self._get_obs(), reward, done, {
