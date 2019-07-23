@@ -15,7 +15,7 @@ def main():
     x = {}
     boxplot_data = {}
     # with open('../agents/records/v10-training-epi-50-vm-10.csv') as f:
-    with open('./data/exp3/v8-training-epi-300-vm-100.csv') as f:
+    with open('./data/exp4/exp-4-training-epi-200-vm-100.csv') as f:
         reader = csv.DictReader(f)
         for line in reader:
             epi = int(line['episode']) + 1

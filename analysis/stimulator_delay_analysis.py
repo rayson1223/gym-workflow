@@ -5,10 +5,10 @@ import matplotlib.pyplot as plt
 
 def main():
     x = {}
-    with open('./records/workflowsim_analysis_record.csv') as f:
+    with open('./records/workflowsim_analysis_record_cs_100_collect_100_delay_10.csv') as f:
         x = json.load(f)
 
-    file_name = "workflowsim-cluster-2-queue-1-post-2-wen-1"
+    file_name = "workflowsim-cs_100_collect_100_delay_10"
     # Process plotting on each key
     for t in x["1"].keys():
         temp = []

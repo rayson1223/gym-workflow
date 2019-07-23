@@ -39,10 +39,10 @@ def main():
     # '../agents/records/v10-training-epi-200-vm-10.csv_episode_reward.csv'
     # '../agents/records/v10-training-epi-200-vm-10.csv_episode_total_reward.csv'
     # '../agents/records/v10-training-epi-200-vm-10.csv_execution_records.csv'
-    # ./data/exp3/v8-training-epi-300-vm-100.csv_episode_lengths.csv
-    # ./data/exp3/v8-training-epi-300-vm-100.csv_episode_reward.csv
-    # ./data/exp3/v8-training-epi-300-vm-100.csv_episode_total_reward.csv
-    # ./data/exp3/v8-training-epi-300-vm-100.csv_execution_records.csv
+    # ./data/exp3/exp-4-training-epi-200-vm-100.csv_episode_lengths.csv
+    # ./data/exp3/exp-4-training-epi-200-vm-100.csv_episode_q_value.csv
+    # ./data/exp3/exp-4-training-epi-200-vm-100.csv_episode_reward.csv
+    # ./data/exp3/exp-4-training-epi-200-vm-100.csv_execution_records.csv
     # Check input and output path is existence
     if len(sys.argv) < 5:
         raise FileNotFoundError(
