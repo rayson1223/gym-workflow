@@ -101,7 +101,7 @@ class MontageWfEnv(WfEnv):
 		return Montage.gen_cs_exec_time(cs)
 	
 	@staticmethod
-	def run_experiment(cs=1, cn=None, degrees=0.1, band=["2mass:j:red"], file="workflow_record.csv"):
+	def run_experiment(cs=None, cn=None, degrees=0.1, band=["2mass:j:red"], file="workflow_record.csv"):
 		montage = Montage(degrees=degrees, band=band)
 		montage.build(cs, cn)
 		montage.pegasus_run()

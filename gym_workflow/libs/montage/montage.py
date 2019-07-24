@@ -54,7 +54,7 @@ class Montage:
 	# self.dax.invoke('on_error', share_dir + "/notification/email")
 	# self.dax.invoke('on_success', share_dir + "/notification/email --report=pegasus-statistics")
 	
-	def build_transformation_catalog(self, clusters_size=1, clusters_num=None):
+	def build_transformation_catalog(self, clusters_size=None, clusters_num=None):
 		"""
 			Some transformations in Montage uses multiple executables
 		"""
@@ -105,7 +105,8 @@ class Montage:
 				#   if at a particular level, say 4 jobs referring to logical transformation B have been scheduled to a siteX.
 				#   The clusters.size factor associated with job B for siteX is say 3. This will result in 2 clustered jobs,
 				#   one composed of 3 jobs and another of 2 jobs.
-				f.write("    profile pegasus \"clusters.size\" \"%s\"\n" % clusters_size)
+				if clusters_num is not None:
+					f.write("    profile pegasus \"clusters.size\" \"%s\"\n" % clusters_size)
 				
 				# 2) clusters.num factor
 				#
@@ -1177,7 +1178,7 @@ class Montage:
 			writer = csv.writer(r)
 			writer.writerow([self.degrees, self.work_dir, cs, cn])
 	
-	def build(self, cluster_size=1, cluster_number=1):
+	def build(self, cluster_size=None, cluster_number=None):
 		self.build_transformation_catalog(cluster_size, cluster_number)
 		self.generate_region_hdr()
 		self.process_color_band()
