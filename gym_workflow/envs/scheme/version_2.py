@@ -90,7 +90,8 @@ class Version2(MontageWfEnv):
         return self._get_obs(), reward, done, {
             "exec": self.exec_time,
             "overhead": self.exec_time,
-            "makespan": self.exec_time
+            "makespan": self.exec_time,
+            "benchmark": 200
         }
 
     def render(self, mode='human'):

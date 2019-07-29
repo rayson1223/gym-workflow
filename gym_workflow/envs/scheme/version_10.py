@@ -80,7 +80,7 @@ class Version10(MontageWfEnv):
 
             self.total_reward += reward
             self.last_action = action
-            if self.total_reward > 100 or self.total_reward < -100:
+            if self.total_reward > 50 or self.total_reward < -100:
                 done = True
 
         return self._get_obs(), reward, done, {
