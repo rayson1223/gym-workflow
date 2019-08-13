@@ -105,7 +105,7 @@ class Montage:
 				#   if at a particular level, say 4 jobs referring to logical transformation B have been scheduled to a siteX.
 				#   The clusters.size factor associated with job B for siteX is say 3. This will result in 2 clustered jobs,
 				#   one composed of 3 jobs and another of 2 jobs.
-				if clusters_num is not None:
+				if clusters_size is not None:
 					f.write("    profile pegasus \"clusters.size\" \"%s\"\n" % clusters_size)
 				
 				# 2) clusters.num factor
