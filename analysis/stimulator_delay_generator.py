@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 
 def main():
-    env = make('Montage-v8')
+    env = make('Montage-v12')
 
     # Data Format
     # {
@@ -20,7 +20,7 @@ def main():
     # }
     records = {}
     cs_range = 100
-    collector_range = 100
+    collector_range = 30
     for i in range(cs_range):
         records[i] = {
             'makespan': [],
@@ -42,7 +42,7 @@ def main():
             records[i]['clusterDelay'].append(float(exec_record['cluster']))
             records[i]['WENDelay'].append(float(exec_record['wen']))
 
-    file_name = "workflowsim_analysis_record_cs_{}_collect_{}_delay_10.csv".format(cs_range, collector_range)
+    file_name = "workflowsim_analysis_record_cn_{}_collect_{}_delay_100.csv".format(cs_range, collector_range)
     # if not os.path.exists(os.getcwd() + '/records/' + file_name):
     #     with open(os.getcwd() + '/records/' + file_name, 'w', newline='', encoding='utf-8') as r:
     #         writer = csv.DictWriter(r, ['records'])

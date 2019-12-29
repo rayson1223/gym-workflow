@@ -15,8 +15,8 @@ class Version11(MontageWfEnv):
         # Montage Experiment Variable
         super(Version11, self).__init__()
 
-        self.action_range = 10
-        self.cluster_range = 10
+        self.action_range = 30
+        self.cluster_range = 30
         self.action_space = Discrete(self.action_range)
         self.observation_space = Discrete(self.cluster_range)
         self.cluster_size = 1
@@ -33,6 +33,7 @@ class Version11(MontageWfEnv):
         self.all_exec_record = list()
         self.all_overhead_record = list()
         self.all_makespan_record = list()
+        self.all_benchmark_record = list()
         self.seed()
         self.reset()
 
@@ -43,7 +44,8 @@ class Version11(MontageWfEnv):
         reward = 0.0
 
         # Return all the data collected
-        makespan = self.run_gen_experiment(action)
+        # makespan = self.run_gen_experiment(action)
+        makespan = self.run_cn_gen_experiment(action)
         # status, jb, wt, cwt = self.run_experiment(action)
 
         # Experiment run failed -> High Penalty
@@ -55,7 +57,7 @@ class Version11(MontageWfEnv):
         # cwt = 0 if cwt is None else cwt
         #
         # makespan = jb
-
+        self.all_makespan_record.append(makespan)
         if not training:
             # Setting up best exec
             # if self.best_makespan is None:
@@ -64,24 +66,35 @@ class Version11(MontageWfEnv):
             #     self.last_makespan = makespan
 
             # Rewarding / Penalty Judgement
-            if makespan < np.percentile(self.all_makespan_record, 20):
-                reward = 10
+            percentile = np.percentile(self.all_makespan_record, 10)
+            benchmark = np.mean(self.all_benchmark_record)
+            # Calc improve percentage
+            if len(self.all_benchmark_record) == 0:
+                self.all_benchmark_record.append(percentile)
+            elif abs(percentile - benchmark) / benchmark * 100 > 10:
+                self.all_benchmark_record.append(percentile)
+                benchmark = np.mean(self.all_benchmark_record)
+            # else:
+                # print(abs(percentile - benchmark) / benchmark * 100)
+                # self.all_benchmark_record.append(percentile)
+                # benchmark = percentile
+
+            if makespan < benchmark:
+                reward = 1
             else:
                 reward = -1
             self.last_makespan = makespan
 
             self.total_reward += reward
             self.last_action = action
-            if self.total_reward > 500 or self.total_reward < -100:
+            if self.total_reward > 20 or self.total_reward < -20:
                 done = True
-        else:
-            self.all_makespan_record.append(makespan)
 
         return self._get_obs(), reward, done, {
             "exec": makespan,
             "overhead": makespan,
             "makespan": makespan,
-            "benchmark": np.percentile(self.all_makespan_record, 20)
+            "benchmark": benchmark
         }
 
     def reset(self):

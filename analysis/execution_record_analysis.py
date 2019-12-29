@@ -9,8 +9,8 @@ csv.field_size_limit(sys.maxsize)
 
 def main():
     x = {}
-    # with open('../agents/records/exp-3-epi-50-train-0-maintain-all_execution_records.csv') as f:
-    with open('./data/exp4/exp-4-training-epi-200-vm-100.csv_execution_records.csv') as f:
+    with open('../agents/records/exp4-training-epi-100-vm-100-v12-B10-T200.csv_execution_records.csv') as f:
+    # with open('./data/exp4/exp-4-training-epi-200-vm-100.csv_execution_records.csv') as f:
         reader = csv.DictReader(f)
         for line in reader:
             epi = int(line['episode']) + 1
@@ -32,7 +32,7 @@ def main():
             x[epi]["makespan"] = records['makespan']
             x[epi]["postscriptDelay"] = records['postscriptDelay'] if 'postscriptDelay' in records else None
             x[epi]["clusterDelay"] = records['clusterDelay'] if 'clusterDelay' in records else None
-            x[epi]["WENDelay"] = records['WENDelay'] if 'WENDelay' in records else None
+            x[epi]["WENDelay"] = records['WENDelay'] if 'WENDelay' in records else Nonef
             x[epi]["benchmark"] = records['benchmark']
 
             # for r in makespan:

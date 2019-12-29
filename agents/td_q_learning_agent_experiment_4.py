@@ -6,13 +6,14 @@ from agents.strategy.td import TD
 import agents.utils.plotting as plt
 
 if __name__ == '__main__':
-    env = make('Montage-v8')
-    episodes = 200
+    # env = make('Montage-v8')
+    env = make('Montage-v12')
+    episodes = 100
 
     # Q Learning
     Q, stats, records = TD.q_learning(
         env, episodes, discount_factor=0.7, epsilon=0.3,
-        training_episode=0, log_file="v8-training-epi-{}-vm-100.csv".format(episodes),
+        training_episode=0, log_file="exp4-training-epi-{}-vm-100-v12-B5-T200.csv".format(episodes),
     )
 
     sQ = OrderedDict(sorted(Q.items()))

@@ -19,8 +19,8 @@ class Version10(MontageWfEnv):
         # Montage Experiment Variable
         super(Version10, self).__init__()
 
-        self.action_range = 10
-        self.cluster_range = 10
+        self.action_range = 30
+        self.cluster_range = 30
         self.action_space = Discrete(self.action_range)
         self.observation_space = Discrete(self.cluster_range)
         self.cluster_size = 1

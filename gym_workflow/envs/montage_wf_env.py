@@ -89,8 +89,8 @@ class MontageWfEnv(WfEnv):
 		raise NotImplemented
 	
 	@staticmethod
-	def run_static_experiment(cs, cn):
-		return Montage.gen_static_exec_time(cs, cn)
+	def run_static_experiment(cs, cn=0):
+		return Montage.gen_static_makespan(cs)
 	
 	@staticmethod
 	def run_gen_experiment(cs, cn=1):
@@ -98,7 +98,12 @@ class MontageWfEnv(WfEnv):
 	
 	@staticmethod
 	def run_cs_gen_experiment(cs):
-		return Montage.gen_cs_exec_time(cs)
+		# return Montage.gen_cs_exec_time(cs)
+		return Montage.gen_cs_wall_time(cs)
+
+	@staticmethod
+	def run_cn_gen_experiment(cn):
+		return Montage.gen_cn_wall_time(cn)
 	
 	@staticmethod
 	def run_experiment(cs=None, cn=None, degrees=0.1, band=["2mass:j:red"], file="workflow_record.csv"):

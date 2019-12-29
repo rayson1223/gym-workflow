@@ -1,6 +1,7 @@
 from gym_workflow.envs.montage_wf_env import MontageWfEnv
 from gym_workflow.envs.database import DatabaseEnv
 from gym.spaces import Discrete, Tuple
+import numpy as np
 import random
 
 
@@ -18,9 +19,11 @@ class Version1(MontageWfEnv):
         # Setting database connection
         # self.db = DatabaseEnv(db_dir)
 
-        self.action_space = Discrete(5)
+        # Describe how many actions available
+        self.action_space = Discrete(3)
 
-        self.observation_space = Discrete(10), Discrete(10), Discrete(3)
+        # What the agent able to observe: cluster parameter
+        self.observation_space = Discrete(30) #, Discrete(10), Discrete(3)
 
         # Episode Conf
         # Best exec_time: None or 1, depends on reward version
@@ -66,26 +69,27 @@ class Version1(MontageWfEnv):
             self.clusters_size += 1
         elif action == 2:
             self.clusters_size -= 1
-        elif action == 3:
-            self.clusters_num += 1
-        elif action == 4:
-            self.clusters_num -= 1
+        # elif action == 3:
+        #     self.clusters_num += 1
+        # elif action == 4:
+        #     self.clusters_num -= 1
 
         # Range Guarding Function
         if self.clusters_size <= 0:
             reward -= 1.0
             self.clusters_size = 1
-        elif self.clusters_size > 10:
+        elif self.clusters_size > 30:
             reward -= 1.0
-            self.clusters_size = 10
-        elif self.clusters_num <= 0:
-            reward -= 1.0
-            self.clusters_num = 1
-        elif self.clusters_num > 10:
-            reward -= 1.0
-            self.clusters_num = 10
+            self.clusters_size = 30
+        # elif self.clusters_num <= 0:
+        #     reward -= 1.0
+        #     self.clusters_num = 1
+        # elif self.clusters_num > 30:
+        #     reward -= 1.0
+        #     self.clusters_num = 30
         else:
-            res = self.run_static_experiment(self.clusters_size, self.clusters_num)
+            res = self.run_static_experiment(self.clusters_size)
+            # res = self.run_cn_gen_experiment(self.clusters_size)
 
             self.all_exec_record.append(float(res))
             self.all_makespan_record.append(float(res))
@@ -99,8 +103,8 @@ class Version1(MontageWfEnv):
                 self.last_exec_time = res
 
             # R1
-            if self.exec_time < self.best_exec_time:
-                reward = 10.0
+            if self.exec_time <= self.best_exec_time:
+                reward = 2.0
                 self.is_improve = 1
                 self.best_exec_time = res
             elif self.last_exec_time is not None:
@@ -117,7 +121,7 @@ class Version1(MontageWfEnv):
                     reward = -1.0
                     self.is_improve = 2
             self.total_reward += reward
-            if self.total_reward > 150:
+            if self.total_reward > 10:
                 done = True
 
         return self._get_obs(), reward, done, {
@@ -156,10 +160,10 @@ class Version1(MontageWfEnv):
         self.wall_time = None
         self.cum_wall_time = None
         self.total_reward = 0
-        self.clusters_size = random.randint(1, 10)
-        self.clusters_num = random.randint(1, 10)
+        self.clusters_size = np.random.randint(1, 30)
+        self.clusters_num = np.random.randint(1, 30)
         # print("Environment had been reset!")
-        return self.clusters_size, self.clusters_num
+        return self.clusters_size
 
     def _get_obs(self):
-        return self.clusters_size, self.clusters_num
+        return self.clusters_size

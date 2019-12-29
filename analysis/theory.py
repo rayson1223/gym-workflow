@@ -4,8 +4,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import random
 from functools import reduce
-from json
+import json
+import csv
 from gym_workflow.libs.recording import write_record
+from gym_workflow.libs.montage.db.model.pegasus_wf import PegasusWf
 
 
 def gen_cn_experiment(vmSize=20, cluster_method="NONE", cluster_size=1):
@@ -176,8 +178,109 @@ def overhead_analysis(cluster_method="HORIZONTAL", cluster_size=20):
     plt.show()
 
 
+def plot_cs_analysis():
+    data = {}
+    with open('./data/fundamental/final_cs_result_30.csv') as f:
+        reader = csv.DictReader(f)
+        for line in reader:
+            cs = int(line['cluster_size'])
+            if cs not in data:
+                data[cs] = []
+            data[cs].append(float(line['wall_time']))
+    get_mean_results(data)
+    plt.clf()
+    fig = plt.figure(1, figsize=(40, 20))
+    ax = fig.add_subplot(111)
+
+    plt.xlabel("Cluster Size")
+    plt.ylabel("Makespan(s)")
+    plt.title('Makespan(s) over cluster size')
+    ax.boxplot(data.values(), showfliers=False)
+    plt.grid()
+    plt.savefig('./plots/final-cs-analysis.png')
+    plt.show()
+
+
+def plot_cn_analysis():
+    data = {}
+    with open('./data/fundamental/montage_num_1to30_sample.csv') as f:
+        reader = csv.DictReader(f)
+        for line in reader:
+            cs = int(line['cluster_num'])
+            if cs not in data:
+                data[cs] = []
+            data[cs].append(float(line['wall_time']))
+    get_mean_results(data)
+    plt.clf()
+    fig = plt.figure(1, figsize=(30, 15))
+    ax = fig.add_subplot(111)
+
+    plt.xlabel("Cluster Number")
+    plt.ylabel("Makespan(s)")
+    plt.title('Makespan(s) over cluster number')
+    plt.grid()
+    ax.boxplot(data.values(), showfliers=False)
+    plt.savefig('./plots/final-cn-analysis.png')
+    plt.show()
+
+
+def plot_cs_cn_analysis():
+    data = {}
+    label = []
+    with open('./data/fundamental/cs_cn_analysis.csv') as f:
+        reader = csv.DictReader(f)
+        for line in reader:
+            cs = int(line['cluster_size'])
+            cn = int(line['cluster_num'])
+            l = "({}, {})".format(cs, cn)
+            if l not in data:
+                data[l] = []
+            data[l].append(float(line['wall_time']))
+            # if cs not in data:
+            #     data[cs] = {}
+            # if cn not in data[cs]:
+            #     data[cs][cn] = []
+            # data[cs][cn].append(float(line['exec_time']))
+
+    plt.clf()
+    fig = plt.figure(1, figsize=(100, 15))
+    ax = fig.add_subplot(111)
+
+    ax.boxplot(data.values(), showfliers=False)
+    plt.xlabel("Cluster Number")
+    plt.ylabel("Makespan(s)")
+    plt.title('Makespan(s) over cluster number')
+    print(data.keys())
+    plt.xticks(range(len(data.keys())), labels=data.keys(), rotation='vertical')
+    plt.grid()
+    plt.savefig('./plots/final-cs-cn-analysis.png')
+    plt.show()
+
+
+def get_wf_results(dir):
+    wf = PegasusWf()
+    wf.initialize_by_work_dir(dir)
+    jbt = wf.get_jobs_run_by_time()
+    wt = wf.get_wall_time()
+    cwt = wf.get_cum_time()
+    print("{} {} {}".format(jbt, wt, cwt))
+
+
+def get_mean_results(data):
+    temp = {}
+    for k, v in data.items():
+        print(v)
+        temp[k] = np.mean(v)
+    print(temp)
+
+
 def main():
-    overhead_analysis(cluster_size=20)
+    # overhead_analysis(cluster_size=20)
+    # Montage - Pegasus CS CN Analysis
+    plot_cs_analysis()
+    # plot_cn_analysis()
+    # get_wf_results("/Users/rayson/Documents/master/pipe/submit/rayson/pegasus/pipeline/run0003")
+    # plot_cs_cn_analysis()
 
 
 if __name__ == '__main__':

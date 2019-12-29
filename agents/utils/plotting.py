@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib
 from matplotlib import pyplot as plt
+import matplotlib.transforms as transforms
 
 matplotlib.style.use('ggplot')
 import itertools
@@ -73,7 +74,7 @@ def plot_q_learning_value_function(Q, xlabel="", ylabel="", title="Q Value Funct
     plot_surface(X, Y, Z, title)
 
 
-def v1_plot_action_value(Q, title="default", show_plot=True):
+def v1_plot_action_value(Q, title="", show_plot=True):
     # min_y = min(min(v) for v in Q.values())
     # max_y = max(max(v) for v in Q.values())
 
@@ -86,37 +87,44 @@ def v1_plot_action_value(Q, title="default", show_plot=True):
     minus_cs_value = []
     minus_cn_value = []
 
-    del Q['key']
+    if 'key' in Q:
+        del Q['key']
     for k, v in Q.items():
         if not callable(v):
-            keys.append(', '.join(map(str, k)))
+            # keys.append(', '.join(map(str, k)))
+            keys.append(k)
             maintain_value.append(v[0])
             add_cs_value.append(v[1])
             minus_cs_value.append(v[2])
-            add_cn_value.append(v[3])
-            minus_cn_value.append(v[4])
+            # add_cn_value.append(v[3])
+            # minus_cn_value.append(v[4])
     plt.clf()
     plt.plot(keys, maintain_value, '-', label="Maintain")
-    plt.plot(keys, add_cs_value, '^--', label="+CS")
-    plt.plot(keys, minus_cs_value, 'v--', label="-CS")
-    plt.plot(keys, add_cn_value, '^:', label="+CN")
-    plt.plot(keys, minus_cn_value, 'v:', label="-CN")
-    plt.xticks(keys, rotation='vertical')
+    plt.plot(keys, add_cs_value, '^--', label="+CN")
+    plt.plot(keys, minus_cs_value, 'v--', label="-CN")
+    # plt.plot(keys, add_cn_value, '^:', label="+CN")
+    # plt.plot(keys, minus_cn_value, 'v:', label="-CN")
+    # plt.xticks(keys, rotation='vertical')
 
-    plt.xlabel('Cluster Size')
-    plt.ylabel('Action Values')
+    plt.xlabel('Cluster Number')
+    plt.ylabel('Q Values')
 
     plt.title(title)
     plt.legend()
-    fig.savefig('plots/{}'.format(title))
+    fig.savefig('plots/{}.png'.format(title))
     if show_plot:
         plt.show()
 
 
 def v1_plot_episode_stats(stats, smoothing_window=10, noshow=False):
     # Plot the episode length over time
-    fig1 = plt.figure(figsize=(10, 5))
-    plt.plot(stats.episode_lengths)
+    epiMean = np.average(stats.episode_lengths)
+    # fig1 = plt.figure(figsize=(10, 5))
+    fig1, axes = plt.subplots()
+    axes.plot(stats.episode_lengths)
+    axes.axhline(y=epiMean, color='black', ls='--')
+    trans = transforms.blended_transform_factory(axes.get_yticklabels()[0].get_transform(), axes.transData)
+    axes.text(0, epiMean, "{:.0f}".format(epiMean), color="black", transform=trans, ha="right", va="center")
     plt.xlabel("Episode")
     plt.ylabel("Episode Length")
     plt.title("Episode Length over Time")
@@ -131,14 +139,15 @@ def v1_plot_episode_stats(stats, smoothing_window=10, noshow=False):
     fig2 = plt.figure(figsize=(10, 5))
     rewards_smoothed = pd.Series(stats.episode_rewards).rolling(smoothing_window, min_periods=smoothing_window).mean()
     plt.plot(rewards_smoothed)
+    plt.axhline(y=10, color='black', ls='--')
     plt.xlabel("Episode")
     plt.ylabel("Episode Reward (Smoothed)")
-    plt.title("Experiment 1: Episode Reward over Time (Smoothed over window size {})".format(smoothing_window))
+    plt.title("Episode Reward over Time (Smoothed over window size {})".format(smoothing_window))
     if noshow:
-        fig2.savefig("Experiment 1: Episode Reward over Time (Smoothed over window size {})".format(smoothing_window))
+        fig2.savefig("Episode Reward over Time (Smoothed over window size {})".format(smoothing_window))
         plt.close(fig2)
     else:
-        fig2.savefig("Experiment 1: Episode Reward over Time (Smoothed over window size {})".format(smoothing_window))
+        fig2.savefig("Episode Reward over Time (Smoothed over window size {})".format(smoothing_window))
         fig2.show()
 
     # Plot time steps and episode number
@@ -146,7 +155,7 @@ def v1_plot_episode_stats(stats, smoothing_window=10, noshow=False):
     plt.plot(np.cumsum(stats.episode_lengths), np.arange(len(stats.episode_lengths)))
     plt.xlabel("Time Steps")
     plt.ylabel("Episode")
-    plt.title("Experiment 1: Episode per time step")
+    plt.title("Episode per time step")
     if noshow:
         fig3.savefig("Experiment 1: Episode per time step")
         plt.close(fig3)
@@ -160,7 +169,7 @@ def v1_plot_episode_stats(stats, smoothing_window=10, noshow=False):
     plt.plot(rewards_smoothed)
     plt.xlabel("Episode")
     plt.ylabel("Episode Total Reward (Smoothed)")
-    plt.title("Experiment 1: Episode Total Reward over Time (Smoothed over window size {})".format(smoothing_window))
+    plt.title("Episode Total Reward over Time (Smoothed over window size {})".format(smoothing_window))
     if noshow:
         fig4.savefig("Experiment 1: Episode Reward over Time (Smoothed over window size {})".format(smoothing_window))
         plt.close(fig4)
@@ -202,9 +211,9 @@ def plot_exp_2_action_value(Q, title="", show_plot=True):
         fig = plt.figure(figsize=(10, 7))
         ax = fig.add_subplot(111, projection='3d')
         surf = ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=matplotlib.cm.coolwarm, vmin=minV, vmax=maxV)
-        ax.set_xlabel('Preference action')
-        ax.set_ylabel('Cluster Size')
-        ax.set_zlabel('Q Value')
+        ax.set_xlabel('Available action (cluster number)')
+        ax.set_ylabel('State (cluster number)')
+        ax.set_zlabel('Q-Value (preference action)')
         ax.set_title(title)
         ax.view_init(ax.elev, -120)
         fig.colorbar(surf)
@@ -246,9 +255,9 @@ def plot_exp_3_action_value(Q, title="", show_plot=True):
         fig = plt.figure(figsize=(10, 7))
         ax = fig.add_subplot(111, projection='3d')
         surf = ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=matplotlib.cm.coolwarm, vmin=minV, vmax=maxV)
-        ax.set_xlabel('Preference action')
-        ax.set_ylabel('Cluster Size')
-        ax.set_zlabel('Q Value')
+        ax.set_xlabel('Available action (cluster number)')
+        ax.set_ylabel('State (cluster number)')
+        ax.set_zlabel('Q-Value (preference action)')
         ax.set_title(title)
         ax.view_init(ax.elev, -120)
         fig.colorbar(surf)
