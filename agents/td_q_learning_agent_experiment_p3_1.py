@@ -8,16 +8,16 @@ import agents.utils.plotting as plt
 if __name__ == '__main__':
     # env = make('Montage-v8')
     env = make('Montage-v12')
-    episodes = 100
+    episodes = 500
 
     # Q Learning
     Q, stats, records = TD.q_learning(
         env, episodes, discount_factor=0.7, epsilon=0.3,
-        training_episode=0, log_file="exp4-training-epi-{}-vm-100-v12-B5-T200.csv".format(episodes),
+        training_episode=0, log_file="p3-exp1-training-epi-{}-vm-100-v12-B10-publication.csv".format(episodes),
     )
 
     sQ = OrderedDict(sorted(Q.items()))
-    plt.plot_exp_3_action_value(sQ, title="exp-4-v8-epi-{}-vm-100".format(episodes))
+    plt.plot_exp_3_action_value(sQ, title="exp-4-v12-epi-{}-vm-100".format(episodes))
     # plt.overall_records_visualization(records['benchmark'], xlabel="Cycle", ylabel="Benchmark Makespan(s)",
     #                                   title="Experiment 3: Benchmark Makespan over Cycle ({} Episodes)".format(
     #                                       episodes))

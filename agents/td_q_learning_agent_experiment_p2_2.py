@@ -9,7 +9,7 @@ if __name__ == '__main__':
     env = make('Montage-v11')
     episodes = 100
 
-    log_pre = "exp-3-epi-{}-train-0-maintain-all-terminal-200-M10-B10.csv".format(episodes)
+    log_pre = "p2-exp1-epi-{}-train-0-maintain-all-terminal-20-M10-B20.csv".format(episodes)
     # log_pre = "exp-3-epi-{}-train-10-maintain-all".format(episodes)
     # log_pre = "exp-3-epi-{}-train-0-maintain-smallest".format(episodes)
     # log_pre = "exp-3-epi-{}-train-0-maintain-largest".format(episodes)
@@ -23,6 +23,6 @@ if __name__ == '__main__':
 
     sQ = OrderedDict(sorted(Q.items()), key=lambda i: keyorder.index(i[0]))
 
-    plt.plot_exp_2_action_value(sQ, title="Experiment 3: Q-Value Overview - %s episodes" % episodes)
+    plt.plot_exp_2_action_value(sQ, title="Q-Value Overview - %s episodes" % episodes, opt_lower=8, opt_high=11, xlim=11, ylim=11)
 
     plt.plot_episode_stats(stats, smoothing_window=10)

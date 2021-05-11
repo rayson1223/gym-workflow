@@ -31,7 +31,7 @@ def main():
             'WENDelay': []
         }
         for j in range(collector_range):
-            print("\r Cluster Size {}/{}, Sampling {}/{}".format(i + 1, cs_range, j+1, collector_range), end="")
+            print("\r Cluster Number {}/{}, Sampling {}/{}".format(i + 1, cs_range, j+1, collector_range), end="")
             sys.stdout.flush()
             state = env.reset()
             next_state, reward, done, exec_record = env.step(i, training=False)
@@ -42,7 +42,7 @@ def main():
             records[i]['clusterDelay'].append(float(exec_record['cluster']))
             records[i]['WENDelay'].append(float(exec_record['wen']))
 
-    file_name = "workflowsim_analysis_record_cn_{}_collect_{}_delay_100.csv".format(cs_range, collector_range)
+    file_name = "workflowsim_analysis_record_cn_{}_collect_{}-publication.csv".format(cs_range, collector_range)
     # if not os.path.exists(os.getcwd() + '/records/' + file_name):
     #     with open(os.getcwd() + '/records/' + file_name, 'w', newline='', encoding='utf-8') as r:
     #         writer = csv.DictWriter(r, ['records'])

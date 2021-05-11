@@ -24,17 +24,21 @@ def main():
     overhead_final = {}
     makespan_final = {}
 
+    print("running")
     # Episode Overhead & Makespan Data loading
-    with open('./data/exp3/v8-training-epi-300-vm-100.csv_execution_records.csv') as f:
+    with open('./records/workflowsim_analysis_record_cn_100_collect_30-final.csv') as f:
         reader = csv.DictReader(f)
+        print("load data")
         for line in reader:
             epi = int(line['episode']) + 1
+            print(line)
             if epi not in makespan_records:
                 makespan_records[epi] = []
                 overhead_records[epi] = []
             records = json.loads(line['records'])
             makespan = records['makespan']
             overhead = records['overhead']
+            print("Makespan?", makespan)
             for r in makespan:
                 makespan_records[epi].append(float(r))
             for o in overhead:

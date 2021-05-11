@@ -31,7 +31,7 @@ if __name__ == '__main__':
 		returns_sum = defaultdict(float)
 		returns_count = defaultdict(float)
 
-		# The final value function
+		# The publication value function
 		V = defaultdict(float)
 
 		# EpisodeStats = namedtuple("Stats", ["episode_states", "episode_actions", "episode_rewards"])

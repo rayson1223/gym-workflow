@@ -28,7 +28,7 @@ class MonteCarlo:
 		returns_sum = defaultdict(float)
 		returns_count = defaultdict(float)
 
-		# The final value function
+		# The publication value function
 		V = defaultdict(float)
 
 		for i_episode in range(1, num_episodes + 1):
@@ -89,7 +89,7 @@ class MonteCarlo:
 		returns_sum = defaultdict(float)
 		returns_count = defaultdict(float)
 
-		# The final action-value function.
+		# The publication action-value function.
 		# A nested dictionary that maps state -> (action -> action-value).
 		Q = defaultdict(lambda: np.zeros(env.action_space.n))
 
@@ -158,7 +158,7 @@ class MonteCarlo:
 				action probabilities. This is the optimal greedy policy.
 		"""
 
-		# The final action-value function.
+		# The publication action-value function.
 		# A dictionary that maps state -> action values
 		Q = defaultdict(lambda: np.zeros(env.action_space.n))
 		# The cumulative denominator of the weighted importance sampling formula

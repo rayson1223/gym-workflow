@@ -193,11 +193,11 @@ def plot_cs_analysis():
     ax = fig.add_subplot(111)
 
     plt.xlabel("Cluster Size")
-    plt.ylabel("Makespan(s)")
-    plt.title('Makespan(s) over cluster size')
+    plt.ylabel("Makespan mean")
+    # plt.title('Makespan over cluster size')
     ax.boxplot(data.values(), showfliers=False)
     plt.grid()
-    plt.savefig('./plots/final-cs-analysis.png')
+    plt.savefig('./plots/publication-cs-analysis.png')
     plt.show()
 
 
@@ -210,17 +210,18 @@ def plot_cn_analysis():
             if cs not in data:
                 data[cs] = []
             data[cs].append(float(line['wall_time']))
-    get_mean_results(data)
+    mean_results = get_mean_results(data)
     plt.clf()
     fig = plt.figure(1, figsize=(30, 15))
     ax = fig.add_subplot(111)
-
     plt.xlabel("Cluster Number")
-    plt.ylabel("Makespan(s)")
-    plt.title('Makespan(s) over cluster number')
+    plt.ylabel("Mean Makespan")
+    # plt.title('Makespan(s) over cluster number')
+    plt.axvspan(8, 11, alpha=0.5)
     plt.grid()
-    ax.boxplot(data.values(), showfliers=False)
-    plt.savefig('./plots/final-cn-analysis.png')
+    # ax.boxplot(data.values(), showfliers=False)
+    ax.plot(mean_results.keys(), mean_results.values())
+    # plt.savefig('./plots/final-cn-analysis.png')
     plt.show()
 
 
@@ -232,6 +233,8 @@ def plot_cs_cn_analysis():
         for line in reader:
             cs = int(line['cluster_size'])
             cn = int(line['cluster_num'])
+            if cs == 3:
+                continue
             l = "({}, {})".format(cs, cn)
             if l not in data:
                 data[l] = []
@@ -243,17 +246,14 @@ def plot_cs_cn_analysis():
             # data[cs][cn].append(float(line['exec_time']))
 
     plt.clf()
-    fig = plt.figure(1, figsize=(100, 15))
-    ax = fig.add_subplot(111)
-
-    ax.boxplot(data.values(), showfliers=False)
-    plt.xlabel("Cluster Number")
+    plt.figure(figsize=(15, 10))
+    plt.boxplot(data.values(), showfliers=False)
+    plt.xlabel("(cluster size, cluster Number)")
     plt.ylabel("Makespan(s)")
-    plt.title('Makespan(s) over cluster number')
+    plt.title('Makespan(s) over (cluster size, cluster Number)')
     print(data.keys())
     plt.xticks(range(len(data.keys())), labels=data.keys(), rotation='vertical')
-    plt.grid()
-    plt.savefig('./plots/final-cs-cn-analysis.png')
+    plt.savefig('./plots/publication-cs-cn-analysis.png')
     plt.show()
 
 
@@ -269,16 +269,19 @@ def get_wf_results(dir):
 def get_mean_results(data):
     temp = {}
     for k, v in data.items():
-        print(v)
+        # if k > 10:
+        #     break
+        # print(v)
         temp[k] = np.mean(v)
     print(temp)
+    return temp
 
 
 def main():
     # overhead_analysis(cluster_size=20)
     # Montage - Pegasus CS CN Analysis
-    plot_cs_analysis()
-    # plot_cn_analysis()
+    # plot_cs_analysis()
+    plot_cn_analysis()
     # get_wf_results("/Users/rayson/Documents/master/pipe/submit/rayson/pegasus/pipeline/run0003")
     # plot_cs_cn_analysis()
 

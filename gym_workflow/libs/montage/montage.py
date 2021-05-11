@@ -1105,6 +1105,44 @@ class Montage:
         return data[0.5][cn]()
 
     @staticmethod
+    def gen_demo_cn_wall_time(cn):
+        data = {
+            0.5: {
+                1: lambda: random.randrange(1600.0, 1700.0, 1),
+                2: lambda: random.randrange(1500.0, 1600.0, 1),
+                3: lambda: random.randrange(1400.0, 1500.0, 1),
+                4: lambda: random.randrange(1300.0, 1400.0, 1),
+                5: lambda: random.randrange(1200.0, 1300.0, 1),
+                6: lambda: random.randrange(1100.0, 1200.0, 1),
+                7: lambda: random.randrange(1000.0, 1100.0, 1),
+                8: lambda: random.randrange(900.0, 1000.0, 1),
+                9: lambda: random.randrange(800.0, 900.0, 1),
+                10: lambda: random.randrange(700.0, 800.0, 1),
+                11: lambda: random.randrange(600.0, 700.0, 1),
+                12: lambda: random.randrange(500.0, 600.0, 1),
+                13: lambda: random.randrange(400.0, 500.0, 1),
+                14: lambda: random.randrange(300.0, 400.0, 1),
+                15: lambda: random.randrange(200.0, 300.0, 1),
+                16: lambda: random.randrange(300.0, 400.0, 1),
+                17: lambda: random.randrange(400.0, 500.0, 1),
+                18: lambda: random.randrange(500.0, 600.0, 1),
+                19: lambda: random.randrange(600.0, 700.0, 1),
+                20: lambda: random.randrange(700.0, 800.0, 1),
+                21: lambda: random.randrange(800.0, 900.0, 1),
+                22: lambda: random.randrange(900.0, 1000.0, 1),
+                23: lambda: random.randrange(1000.0, 1100.0, 1),
+                24: lambda: random.randrange(1100.0, 1200.0, 1),
+                25: lambda: random.randrange(1200.0, 1300.0, 1),
+                26: lambda: random.randrange(1300.0, 1400.0, 1),
+                27: lambda: random.randrange(1400.0, 1500.0, 1),
+                28: lambda: random.randrange(1500.0, 1600.0, 1),
+                29: lambda: random.randrange(1600.0, 1700.0, 1),
+                30: lambda: random.randrange(1700.0, 1800.0, 1),
+                31: lambda: random.randrange(1800.0, 1900.0, 1),
+            }, }
+        return data[0.5][cn]()
+
+    @staticmethod
     def gen_static_exec_time(cs, cn):
         """
             Static Execution time data for examine reinforcement learning method converging

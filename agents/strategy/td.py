@@ -37,7 +37,7 @@ class TD:
         """
         EpisodeStats = namedtuple("Stats",
                                   ["episode_lengths", "episode_rewards", "episode_total_reward", "episode_action"])
-        # The final action-value function.
+        # The publication action-value function.
         # A nested dictionary that maps state -> (action -> action-value).
         Q = defaultdict(lambda: np.zeros(env.action_space.n))
 
@@ -93,9 +93,9 @@ class TD:
             # Reset the environment and pick the first action
             state = env.reset()
 
-            pd.Series(stats.episode_rewards).to_csv(path="records/{}_episode_reward.csv".format(log_file))
-            pd.Series(stats.episode_lengths).to_csv(path="records/{}_episode_lengths.csv".format(log_file))
-            pd.Series(stats.episode_total_reward).to_csv(path="records/{}_episode_total_reward.csv".format(log_file))
+            pd.Series(stats.episode_rewards).to_csv("records/{}_episode_reward.csv".format(log_file))
+            pd.Series(stats.episode_lengths).to_csv("records/{}_episode_lengths.csv".format(log_file))
+            pd.Series(stats.episode_total_reward).to_csv("records/{}_episode_total_reward.csv".format(log_file))
 
             # Print out which episode we're on, useful for debugging.
             if (i_episode + 1) % 10 == 0:
@@ -202,7 +202,7 @@ class TD:
                 stats is an EpisodeStats object with two numpy arrays for episode_lengths and episode_rewards.
         """
 
-        # The final action-value function.
+        # The publication action-value function.
         # A nested dictionary that maps state -> (action -> action-value).
         Q = defaultdict(lambda: np.zeros(env.action_space.n))
         EpisodeStats = namedtuple("Stats", ["episode_lengths", "episode_rewards"])

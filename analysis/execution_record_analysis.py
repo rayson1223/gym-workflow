@@ -9,7 +9,7 @@ csv.field_size_limit(sys.maxsize)
 
 def main():
     x = {}
-    with open('../agents/records/exp4-training-epi-100-vm-100-v12-B10-T200.csv_execution_records.csv') as f:
+    with open('../agents/records/p1_3-training-0-epi-100-vm-10.csv_execution_records.csv') as f:
     # with open('./data/exp4/exp-4-training-epi-200-vm-100.csv_execution_records.csv') as f:
         reader = csv.DictReader(f)
         for line in reader:
@@ -44,7 +44,7 @@ def main():
             for k, v in enumerate(x[epi][t]):
                 x[epi][t][k] = float(v)
 
-    file_name = "exp-3-epi-50-train-0-maintain-all"
+    file_name = "p1_3_analysis"
     # Process plotting on each key
     for t in x[1].keys():
         temp = []

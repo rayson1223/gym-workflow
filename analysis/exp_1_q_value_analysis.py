@@ -1,4 +1,3 @@
-import PyGnuplot as gp
 import numpy as np
 import csv
 from collections import OrderedDict
@@ -78,9 +77,28 @@ def plot_ideal_q_value(q, epi):
                                  title="Experiment 1: Ideal Action Values Overview - {} episodes".format(epi + 1))
 
 
+def plot_idea_cluster(xlabel='Clustering Parameter'):
+    x = np.arange(0, 21, 1)
+
+    def polar(x):
+        a = []
+        for item in x:
+            a.append(math.pow(0.2 * (item - 10), 2))
+        return a
+
+    y = polar(x)
+    plt.plot(x, y)
+    plt.tick_params(axis='both', which='both', labelbottom=False,
+                    labelleft=False)
+    plt.xlabel(xlabel)
+    plt.ylabel("Makespan (s)")
+    plt.title("Makespan (s) over clustering parameter")
+    plt.show()
+
+
 def main():
     q_record = {}
-    with open('../agents/records/exp1-cn-training-0-epi-1000-vm-10.csv_episode_q_value.csv') as f:
+    with open('../agents/records/exp1-cn-training-0-epi-100-vm-10.csv_episode_q_value.csv') as f:
         reader = csv.DictReader(f)
         for line in reader:
             fs = line['Q Value'].replace("array(", "").replace("])", "]").replace("\n", "")
@@ -99,6 +117,9 @@ def main():
     if 'key' in sorted_q:
         del sorted_q['key']
 
+    # plot_idea_cluster('Cluster Number')
+    # plot_idea_cluster('Cluster Size')
+    # plot_idea_cluster('(Cluster Size, Cluster Number)')
     plot_ideal_q_value(sorted_q, last_epi)
     # Initial Ideal Q value
     # for k, v in sorted_q.items():

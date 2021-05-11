@@ -104,7 +104,11 @@ class MontageWfEnv(WfEnv):
 	@staticmethod
 	def run_cn_gen_experiment(cn):
 		return Montage.gen_cn_wall_time(cn)
-	
+
+	@staticmethod
+	def run_demo_cn_gen_experiment(cn):
+		return Montage.gen_demo_cn_wall_time(cn)
+
 	@staticmethod
 	def run_experiment(cs=None, cn=None, degrees=0.1, band=["2mass:j:red"], file="workflow_record.csv"):
 		montage = Montage(degrees=degrees, band=band)

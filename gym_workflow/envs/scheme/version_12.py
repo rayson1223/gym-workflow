@@ -66,27 +66,27 @@ class Version12(WorkflowSimEnv):
                 self.last_makespan = makespan
 
             # Rewarding / Penalty Judgement
-            percentile = np.percentile(self.all_makespan_record, 20)
+            percentile = np.percentile(self.all_makespan_record, 10)
             benchmark = np.mean(self.all_benchmark_record)
             # Calc improve percentage
             if len(self.all_benchmark_record) == 0:
                 self.all_benchmark_record.append(percentile)
-            elif abs(percentile - benchmark) / benchmark * 100 > 5:
+            elif abs(percentile - benchmark) / benchmark * 100 > 10:
                 self.all_benchmark_record.append(percentile)
                 benchmark = np.mean(self.all_benchmark_record)
-            else:
-                print(abs(percentile - benchmark) / benchmark * 100)
+            # else:
+                # print(abs(percentile - benchmark) / benchmark * 100)
 
             if makespan < benchmark:
                 self.best_makespan = makespan
-                reward = 10
+                reward = 1
             else:
-                reward = -5
+                reward = -1
             self.last_makespan = makespan
 
             self.total_reward += reward
             self.last_action = action
-            if self.total_reward > 200 or self.total_reward < -100:
+            if self.total_reward > 20 or self.total_reward < -20:
                 done = True
 
         return self._get_obs(), reward, done, {

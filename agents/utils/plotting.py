@@ -1,3 +1,4 @@
+import numpy
 import numpy as np
 import pandas as pd
 import matplotlib
@@ -21,7 +22,8 @@ def overall_records_visualization(records_list, xlabel="", ylabel="", title="", 
         plt.show()
 
 
-def episode_records_boxplot_visualization(records_list, xlabel="", ylabel="", title="", show_plot=True, showfliers=False):
+def episode_records_boxplot_visualization(records_list, xlabel="", ylabel="", title="", show_plot=True,
+                                          showfliers=False):
     plt.clf()
     fig = plt.figure(figsize=(50, 5))
     ax = fig.add_subplot(111)
@@ -180,7 +182,7 @@ def v1_plot_episode_stats(stats, smoothing_window=10, noshow=False):
     return fig1, fig2, fig3
 
 
-def plot_exp_2_action_value(Q, title="", show_plot=True):
+def plot_exp_p1_3_action_value(Q, title="", show_plot=True, show_analysis=True):
     if 'key' in Q.keys():
         del Q['key']
     min_x = min(k for k in Q.keys())
@@ -200,31 +202,41 @@ def plot_exp_2_action_value(Q, title="", show_plot=True):
     Z = np.zeros(shape=(max_x, max_x))
     for x, v in Q.items():
         for i, y in enumerate(v, start=0):
-            Z[x - 1, i] = y
-
-    def plot_surface(X, Y, Z, title):
-        def find_min_max_range(values):
-            a = values.reshape(values.size)
-            return min(a), max(a)
-
-        minV, maxV = find_min_max_range(Z)
-        fig = plt.figure(figsize=(10, 7))
-        ax = fig.add_subplot(111, projection='3d')
-        surf = ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=matplotlib.cm.coolwarm, vmin=minV, vmax=maxV)
-        ax.set_xlabel('Available action (cluster number)')
-        ax.set_ylabel('State (cluster number)')
-        ax.set_zlabel('Q-Value (preference action)')
-        ax.set_title(title)
-        ax.view_init(ax.elev, -120)
-        fig.colorbar(surf)
-        fig.savefig("./plots/{}.png".format(title))
-        # if show_plot:
-        plt.show()
+            Z[i, x-1] = y
 
     plot_surface(X, Y, Z, title)
+    if show_analysis:
+        epi_analysis(Q, opt_lower=14, opt_high=16)
 
 
-def plot_exp_3_action_value(Q, title="", show_plot=True):
+def plot_exp_2_action_value(Q, title="", show_plot=True, show_analysis=True, opt_lower=14, opt_high=16, xlim=31, ylim=31):
+    if 'key' in Q.keys():
+        del Q['key']
+    min_x = min(k for k in Q.keys())
+    max_x = max(k for k in Q.keys())
+    # tmp = []
+    # for y in V.values():
+    #     tmp += y
+    # min_y = min(tmp)
+    # max_y = max(tmp)
+
+    x_range = np.arange(min_x, max_x + 1)
+    y_range = np.arange(min_x, max_x + 1)
+    X, Y = np.meshgrid(x_range, y_range)
+
+    # Find value for all (x, y) coordinates
+    # Z = np.apply_along_axis(lambda _: V[_[0]][_[1]-1], 2, np.dstack([X, Y]))
+    Z = np.zeros(shape=(max_x, max_x))
+    for x, v in Q.items():
+        for i, y in enumerate(v, start=0):
+            Z[i, x-1] = y
+
+    plot_surface(X, Y, Z, title)
+    if show_analysis:
+        epi_analysis(Q, opt_lower=opt_lower, opt_high=opt_high, xlim=xlim, ylim=ylim)
+
+
+def plot_exp_3_action_value(Q, title="", show_plot=True, ticks=True):
     min_x = min(k for k in Q.keys())
     max_x = max(k for k in Q.keys())
     # tmp = []
@@ -244,28 +256,10 @@ def plot_exp_3_action_value(Q, title="", show_plot=True):
     Z = np.zeros(shape=(100, 100))
     for x, v in Q.items():
         for i, y in enumerate(v, start=0):
-            Z[x - 1, i] = y
+            Z[i, x-1] = y
 
-    def plot_surface(X, Y, Z, title):
-        def find_min_max_range(values):
-            a = values.reshape(values.size)
-            return min(a), max(a)
-
-        minV, maxV = find_min_max_range(Z)
-        fig = plt.figure(figsize=(10, 7))
-        ax = fig.add_subplot(111, projection='3d')
-        surf = ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=matplotlib.cm.coolwarm, vmin=minV, vmax=maxV)
-        ax.set_xlabel('Available action (cluster number)')
-        ax.set_ylabel('State (cluster number)')
-        ax.set_zlabel('Q-Value (preference action)')
-        ax.set_title(title)
-        ax.view_init(ax.elev, -120)
-        fig.colorbar(surf)
-        fig.savefig("./plots/{}.png".format(title))
-        # if show_plot:
-        plt.show()
-
-    plot_surface(X, Y, Z, title)
+    plot_surface(X, Y, Z, title, ticks_on=False)
+    epi_analysis(Q,opt_lower=2, opt_high=11, xlim=100, ylim=100)
 
 
 def plot_simple_line(records, xlabel="", ylabel="", title="", show_plot=True):
@@ -357,9 +351,13 @@ def plot_line_value(Q, title="default", show_plot=True):
 
 
 def plot_episode_stats(stats, smoothing_window=10, noshow=False):
+    epiMean = np.average(stats.episode_lengths)
     # Plot the episode length over time
-    fig1 = plt.figure(figsize=(10, 5))
-    plt.plot(stats.episode_lengths)
+    fig1, axes = plt.subplots()
+    axes.plot(stats.episode_lengths)
+    axes.axhline(y=epiMean, color='black', ls='--')
+    trans = transforms.blended_transform_factory(axes.get_yticklabels()[0].get_transform(), axes.transData)
+    axes.text(0, epiMean, "{:.0f}".format(epiMean), color="black", transform=trans, ha="right", va="center")
     plt.xlabel("Episode")
     plt.ylabel("Episode Length")
     plt.title("Episode Length over Time")
@@ -412,3 +410,47 @@ def plot_episode_stats(stats, smoothing_window=10, noshow=False):
         fig4.show()
 
     return fig1, fig2, fig3
+
+
+def epi_analysis(data, opt_lower=2, opt_high=11, xlim=31, ylim=31):
+    preference_action = {}
+    for k, v in data.items():
+        print(v)
+        preference_action[k] = numpy.argmax(v) + 1
+    X = preference_action.keys()
+
+    fig, ax = plt.subplots(figsize=(20, 10))
+
+    plt.xlabel("State (cluster size)")
+    plt.ylabel("Q value (preference action)")
+    # plt.ylim([0, 10])
+    ax.axhspan(opt_lower, opt_high, alpha=0.5)
+    plt.ylim([0, ylim])
+    ax.plot(X, preference_action.values())
+    plt.title("Q-value (preference action) over state")
+    ax.set_xticks(range(0, xlim))
+    ax.set_yticks(range(0, ylim))
+    plt.show()
+
+
+def plot_surface(X, Y, Z, title, ticks_on=True):
+    def find_min_max_range(values):
+        a = values.reshape(values.size)
+        return min(a), max(a)
+
+    minV, maxV = find_min_max_range(Z)
+    fig = plt.figure(figsize=(20, 15))
+    ax = fig.add_subplot(111, projection='3d')
+    surf = ax.plot_surface(X, Y, Z, cmap=matplotlib.cm.coolwarm, vmin=minV, vmax=maxV)
+    if ticks_on:
+        ax.set_xticks(range(0, X.max() + 1))
+        ax.set_yticks(range(0, Y.max() + 1))
+    ax.set_xlabel('State (cluster number)')
+    ax.set_ylabel('Available action (cluster number)')
+    ax.set_zlabel('Q-Value (preference action)')
+    ax.set_title(title)
+    ax.view_init(ax.elev, -120)
+    fig.colorbar(surf)
+    fig.savefig("./plots/{}.png".format(title))
+    # if show_plot:
+    plt.show()
